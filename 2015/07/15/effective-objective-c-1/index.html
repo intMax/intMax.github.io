@@ -1,0 +1,777 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="阅读笔记," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="第一章 熟悉Objective-C1.OC使用动态绑定的消息结构，在runtime才会检查对象类型、决定执行何种代码。runtime是很多功能的基础，如分类、动态添加类等
+2.@class可以向前声明一个类，类似的还有@protocol，这两个关键字告诉编译器我是有这个类或者协议的。
+3.#import不会引起引用头文件死循环和重复引用，它会自动让其中一个失效，而#include用来引用C或C++">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Effective Objective-C 2.0 阅读笔记<一>">
+<meta property="og:url" content="http://intMax.github.io/2015/07/15/effective-objective-c-1/index.html">
+<meta property="og:site_name" content="intMax'Blog">
+<meta property="og:description" content="第一章 熟悉Objective-C1.OC使用动态绑定的消息结构，在runtime才会检查对象类型、决定执行何种代码。runtime是很多功能的基础，如分类、动态添加类等
+2.@class可以向前声明一个类，类似的还有@protocol，这两个关键字告诉编译器我是有这个类或者协议的。
+3.#import不会引起引用头文件死循环和重复引用，它会自动让其中一个失效，而#include用来引用C或C++">
+<meta property="og:image" content="http://intMax.github.io/uploads/forwarding.jpg">
+<meta property="og:updated_time" content="2016-03-24T08:53:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Effective Objective-C 2.0 阅读笔记<一>">
+<meta name="twitter:description" content="第一章 熟悉Objective-C1.OC使用动态绑定的消息结构，在runtime才会检查对象类型、决定执行何种代码。runtime是很多功能的基础，如分类、动态添加类等
+2.@class可以向前声明一个类，类似的还有@protocol，这两个关键字告诉编译器我是有这个类或者协议的。
+3.#import不会引起引用头文件死循环和重复引用，它会自动让其中一个失效，而#include用来引用C或C++">
+<meta name="twitter:image" content="http://intMax.github.io/uploads/forwarding.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> Effective Objective-C 2.0 阅读笔记<一> | intMax'Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">intMax'Blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-heartbeat fa-fw"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Effective Objective-C 2.0 阅读笔记<一>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-07-15T00:00:00+08:00" content="2015-07-15">
+              2015-07-15
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/07/15/effective-objective-c-1/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/07/15/effective-objective-c-1/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="第一章-熟悉Objective-C"><a href="#第一章-熟悉Objective-C" class="headerlink" title="第一章 熟悉Objective-C"></a>第一章 熟悉Objective-C</h2><p>1.OC使用动态绑定的消息结构，在runtime才会检查对象类型、决定执行何种代码。runtime是很多功能的基础，如分类、动态添加类等</p>
+<p>2.@class可以向前声明一个类，类似的还有@protocol，这两个关键字告诉编译器我是有这个类或者协议的。</p>
+<p>3.#import不会引起引用头文件死循环和重复引用，它会自动让其中一个失效，而#include用来引用C或C++类型的头文件，会引起死循环。</p>
+<p>4.考虑以下代码：<br><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">id</span> obj1=<span class="comment">/*. . .*/</span>;</span><br><span class="line"><span class="keyword">id</span> obj2=<span class="comment">/*. . .*/</span>;</span><br><span class="line"><span class="keyword">id</span> obj3=<span class="comment">/*. . .*/</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">NSArray</span> *arrayA=[<span class="built_in">NSArray</span> arrayWithObjects:obj1,obj2,obj3,<span class="literal">nil</span>];</span><br><span class="line"></span><br><span class="line"><span class="built_in">NSArray</span> *arrayB=@[obj1,obj2,obj3];</span><br></pre></td></tr></table></figure></p>
+<p>如果obj2=nil会怎样？显然后者初始化数组会报错，而前者虽然不会报错，但是将只有一个对象ojb1。对于前者这很可能不是我们想要的结果，会导致后面出现bug很难追踪，所以推荐使用后者的方式初始化，这样就能尽快定位到问题所在。</p>
+<p>5.多用类型常量，少用#define预处理命令。用extern关键字可对外公开某个常量，AFNetworking中常用这种方式来对外公布一个NSNotification标识符。</p>
+<p>6.枚举尽量用NS_ENUM和NS_OPTIONS宏来定义，这样可以确保枚举是指定的数据类型来实现的。后者还可进行按位或、按位与运算</p>
+<h2 id="第二章-对象、消息、运行期"><a href="#第二章-对象、消息、运行期" class="headerlink" title="第二章 对象、消息、运行期"></a>第二章 对象、消息、运行期</h2><p>1.@synthesis和@dynamic，前者会由编译器在编译期间自动生成getter、setter（假设属性是readwrite），后者告诉编译器，不自动生成getter/setter方法，避免编译期间产生警告。自定义getter、setter可以选择重载他们，也可以在利用runtime期的消息转发机制来实现。</p>
+<blockquote>
+<p>这里插两点：第一，不要在重载的setter方法里有这样的写法self.property=property，应该改为_property=property，否则会引起一个无限循环，这本书在这里的写法是错误的。那么如果要在子类重载这个setter方法该怎么办呢？子类没有_property这个实例变量。这时，可以在子类的实现文件中加上@synthesize property = _property。其实我一开始的想法是用self-&gt;_property来访问的，但是编译不通过。第二，如果同时覆写了getter和setter方法，那么属性对应的实例变量就不存在了，需要自己手动添加。</p>
+</blockquote>
+<p>2.在对象外部总是应该通过属性来访问实例变量，那么在对象内部呢？直接用实例变量访问速度快，但是会绕过属性特质（copy等），更重要的是不会触发KVO。这本书给的建议的是：写入实例变量时应该用setter方法，而在读取时则直接访问。</p>
+<p>3.尽量避免将可变对象放入容器，容器内部会根据哈希码来对各个对象进行分箱，这意味着在对象被放入容器的时候已经被分好了，如果后来改变了对象，哈希码也会随着改变，这样，之前的分箱就有问题了。</p>
+<p>4.类簇，系统框架中普遍使用了这种模式，如UIButton、NSArray等。以前做网站的时候用过工厂模式，其实类簇基类的内部就是一个工厂，根据传入的参数分别创建相应的对象。相信平常接触比较多的是分类而非类簇，那么两者有什么区别呢？首先，类簇可以隐藏基类背后的具体实现（当然，由于runtime的存在，想要真正隐藏是不可能的），其次，可以用isKindOfClass和isMemberOfClass试试看声明出来的对象是否属于对应的类。类簇声明的对象永远不可能是该基类。<br><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">id</span> maybeAnArray=<span class="comment">/*. . .*/</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>([maybeAnArray class] == [<span class="built_in">NSArray</span> class])&#123;</span><br><span class="line"><span class="comment">//will never be hit</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>([[maybeAnArray class] isKindOfClass:[<span class="built_in">NSArray</span> class]])&#123;</span><br><span class="line"><span class="comment">//will be hit</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>5.对象关联机制，运用这种机制可以给分类模拟添加属性，不同属性可以用“键”来区分，属性特质可以用关联类型来表示（OBJC_ASSOCIATION_COPY等）。但是建议不到万不得已的时候不要用这种方法，否则出现“保留环”等内存bug将很难追踪。</p>
+<p>6.消息转发机制<br><img src="/uploads/forwarding.jpg" alt="image" title="forwarding"><br>在重写forwardInvocation:时，也要重写methodSignatureForSelector:方法，用来返回相应的方法签名，便于生成一个NSInvocation传递给forwardInvocation:。最后消息未能处理会调用NSObjec的doseNotRecognizeSelector:方法抛出异常。消息传递越往后消耗越大，像@dynamic在resolveInstanceMethod:阶段就可以完成。模拟多继承可以在forwardingTargetForSelector:完成。</p>
+<p>7.方法混写可以交换两个方法的实现、替代原方法的实现等，这项技术一般用于调试，但是最近在看AFNetworking源码时发现，他也用了这项技术，NSURLSessionTask是一个类簇，在iOS7、iOS8中内部继承关系有点不一样，所以用到了这项技术来替换原有的resume、suspend方法。</p>
+<p>8.类对象，每个对象有一个isa指针，指向对应的类，其结构如下：<br><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> objc_class *Class;  </span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> objc_object &#123;  </span><br><span class="line">    Class isa;  </span><br><span class="line">&#125; *<span class="keyword">id</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> objc_class &#123;  </span><br><span class="line">    Class isa;  </span><br><span class="line">    Class super_class;  </span><br><span class="line">    <span class="keyword">const</span> charchar *name;  </span><br><span class="line">    <span class="keyword">long</span> version;  </span><br><span class="line">    <span class="keyword">long</span> info;  </span><br><span class="line">    <span class="keyword">long</span> instance_size;  </span><br><span class="line">    <span class="keyword">struct</span> objc_ivar_list *ivars;  </span><br><span class="line">    <span class="keyword">struct</span> objc_method_list **methodLists;  </span><br><span class="line">    <span class="keyword">struct</span> objc_cache *cache;  </span><br><span class="line">    <span class="keyword">struct</span> objc_protocol_list *protocols;  </span><br><span class="line">  </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>显然Class本身也是个对象，它指向一个叫“元类（metaclass）”的类，类方法就定义在这里。元类的继承关系和类一样，它继承自父类的元类。根类的元类指针指向自己，从而形成闭环。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/阅读笔记/" rel="tag">#阅读笔记</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/08/02/effective-objective-c-2/" rel="prev" title="Effective Objective-C 2.0 阅读笔记<二>">
+                Effective Objective-C 2.0 阅读笔记<二> <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/07/15/effective-objective-c-1/"
+           data-title="Effective Objective-C 2.0 阅读笔记<一>" data-url="http://intMax.github.io/2015/07/15/effective-objective-c-1/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.png"
+               alt="intMax" />
+          <p class="site-author-name" itemprop="name">intMax</p>
+          <p class="site-description motion-element" itemprop="description">Talk is cheap, show me the code</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#第一章-熟悉Objective-C"><span class="nav-number">1.</span> <span class="nav-text">第一章 熟悉Objective-C</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第二章-对象、消息、运行期"><span class="nav-number">2.</span> <span class="nav-text">第二章 对象、消息、运行期</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">intMax</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  
+<script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = NexT.utils.escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    NexT.motion.middleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+
+      if (CONFIG.sidebar.display === 'post' || CONFIG.sidebar.display === 'always') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          NexT.utils.displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"intmaxpan"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
