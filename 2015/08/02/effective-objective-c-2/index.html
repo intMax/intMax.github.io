@@ -49,6 +49,8 @@
 
 
 
+  <link rel="alternate" href="/atom.xml" title="intMax'Blog" type="application/atom+xml" />
+
 
 
 
@@ -69,7 +71,7 @@
 <meta property="og:description" content="第三章 接口与API设计1.Objective-C没有命名空间，所以在命名上最好加上前缀以减小冲突的可能，前缀建议采用三个字母（苹果保留使用所有两个字母前缀的权利）。在开发自己的类库时如果用了其他第三方类库，最好将第三方类库也加上前缀，这样可以让使用者使用你的类库的同时也用你的类库中用到第三方类库（有点绕. . .）。
 2.覆写description方法，打印出一些有用信息帮助调试。
 3.封装一个">
-<meta property="og:updated_time" content="2016-03-24T09:52:13.000Z">
+<meta property="og:updated_time" content="2016-03-27T10:29:02.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Effective Objective-C 2.0 阅读笔记<二>">
 <meta name="twitter:description" content="第三章 接口与API设计1.Objective-C没有命名空间，所以在命名上最好加上前缀以减小冲突的可能，前缀建议采用三个字母（苹果保留使用所有两个字母前缀的权利）。在开发自己的类库时如果用了其他第三方类库，最好将第三方类库也加上前缀，这样可以让使用者使用你的类库的同时也用你的类库中用到第三方类库（有点绕. . .）。
@@ -142,7 +144,7 @@
       <span class="logo-line-after"><i></i></span>
     </a>
   </div>
-  <p class="site-subtitle"></p>
+  <p class="site-subtitle">an iOS developer's Blog</p>
 </div>
 
 <div class="site-nav-toggle">
@@ -210,12 +212,12 @@
         </li>
       
         
-        <li class="menu-item menu-item-commonweal">
-          <a href="/404.html" rel="section">
+        <li class="menu-item menu-item-rss">
+          <a href="/atom.xml" rel="section">
             
-              <i class="menu-item-icon fa fa-heartbeat fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-rss fa-fw"></i> <br />
             
-            公益404
+            RSS
           </a>
         </li>
       
@@ -330,13 +332,13 @@
 <h2 id="第四章-协议与分类"><a href="#第四章-协议与分类" class="headerlink" title="第四章 协议与分类"></a>第四章 协议与分类</h2><p>1.委托属性常用weak来修饰；一个协议里的方法是<code>optional</code>的，需要先判断委托对象是否实现改方法，如果经常需要判断则可考虑做个缓存。</p>
 <p>2.<code>weak</code>和<code>unsafe_unretain</code>的区别是前者在相关对象销毁时需要自动清空，后者则不需要。</p>
 <p>3.分类中不要添加属性，必须添加的话可以采用关联对象机制模拟，不推荐。分类的设计初衷是扩展类的功能，而属性是用于数据的封装，因此，属性最好定义在主接口中。</p>
-<p>4.<code>class-continuation</code>分类（在其他地方看到过叫匿名分类），这本书多次提到了这个概念，对应的部分是：<br><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">//SonClass.h</span></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">SonClass</span> : <span class="title">FatherClass</span></span></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//SonClass.m</span></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">SonClass</span>()</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="comment">//class-continuation分类</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure></p>
+<p>4.<code>class-continuation</code>分类（在其他地方看到过叫匿名分类），这本书多次提到了这个概念，对应的部分是：<br><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">//SonClass.h</span></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">SonClass</span> : <span class="title">FatherClass</span></span></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//SonClass.m</span></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">SonClass</span>()</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="comment">//class-continuation分类</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure></p>
 <p>5.<code>class-continuation</code>分类可以用来隐藏实现细节，如系统的WebKit其实大部分是C++编写的，但是对外展示的却是一套整洁的Objective-C接口。</p>
-<p>6.匿名对象，常见的有：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">@property (nonatomic, weak) id&lt;MyDelegate&gt; delegate;</span><br></pre></td></tr></table></figure></p>
-<p>这句话的意思是delegate遵循MyDelegate协议，至于它本身是什么类不关心。匿名分类也可以用来对一些第三方类库进行一些简单封装：<br><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@protocol</span> <span class="title">MyDatabaseConnection</span></span></span><br><span class="line">-(<span class="keyword">void</span>)connect;</span><br><span class="line">-(<span class="keyword">void</span>)disconnect;</span><br><span class="line">-(<span class="built_in">BOOL</span>)isConnected;</span><br><span class="line">-(<span class="built_in">NSArray</span> *)performQuery:(<span class="built_in">NSString</span>*)query;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//使用</span></span><br><span class="line">@ protocol MyDatabaseConnection;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">MyDatabaseManager</span> : <span class="title">NSObject</span></span></span><br><span class="line">+sharedInstance;</span><br><span class="line">-(<span class="keyword">id</span>&lt;MyDatabaseConnection&gt;)connectionWithIdentifier:(<span class="built_in">NSString</span>*)identifier;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure></p>
+<p>6.匿名对象，常见的有：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@property (nonatomic, weak) id&lt;MyDelegate&gt; delegate;</span><br></pre></td></tr></table></figure></p>
+<p>这句话的意思是delegate遵循MyDelegate协议，至于它本身是什么类不关心。匿名分类也可以用来对一些第三方类库进行一些简单封装：<br><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@protocol</span> <span class="title">MyDatabaseConnection</span></span></span><br><span class="line">-(<span class="keyword">void</span>)connect;</span><br><span class="line">-(<span class="keyword">void</span>)disconnect;</span><br><span class="line">-(<span class="built_in">BOOL</span>)isConnected;</span><br><span class="line">-(<span class="built_in">NSArray</span> *)performQuery:(<span class="built_in">NSString</span>*)query;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//使用</span></span><br><span class="line">@ protocol MyDatabaseConnection;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">MyDatabaseManager</span> : <span class="title">NSObject</span></span></span><br><span class="line">+sharedInstance;</span><br><span class="line">-(<span class="keyword">id</span>&lt;MyDatabaseConnection&gt;)connectionWithIdentifier:(<span class="built_in">NSString</span>*)identifier;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure></p>
 <p>这里隐藏了数据库连接所用的类（可能来自不同框架），而且在后续中，无需改变公共API，就能切换后端实现类。</p>
 <p>6.关于匿名分类的一个面试题：</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/*</span><br><span class="line">`id`、`id&lt;NSObject&gt;`、`NSObject`的区别</span><br><span class="line"></span><br><span class="line">`NSObject`：就是用来定义`NSObject`对象的。</span><br><span class="line">`id`：它就是一个指针，它可以指向的类型不仅限于`NSObject`，如`NSProxy`。</span><br><span class="line">`id&lt;NSObject&gt;`：它指向的对象要求实现`NSObject`所实现的协议，所以说它可以定义`NSObject`、`NSProxy`（它也实现了`&lt;NSObject&gt;`）或者其他实现了`&lt;NSObject&gt;`的对象。</span><br><span class="line">*/</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">id</span>、<span class="keyword">id</span>&lt;<span class="built_in">NSObject</span>&gt;、<span class="built_in">NSObject</span>的区别</span><br><span class="line"></span><br><span class="line"><span class="built_in">NSObject</span>：就是用来定义<span class="built_in">NSObject</span>对象的。</span><br><span class="line"><span class="keyword">id</span>：它就是一个指针，它可以指向的类型不仅限于<span class="built_in">NSObject</span>，如<span class="built_in">NSProxy</span>。</span><br><span class="line"><span class="keyword">id</span>&lt;<span class="built_in">NSObject</span>&gt;：它指向的对象要求实现<span class="built_in">NSObject</span>所实现的协议，所以说它可以定义<span class="built_in">NSObject</span>、<span class="built_in">NSProxy</span>（它也实现了&lt;<span class="built_in">NSObject</span>&gt;）或者其他实现了&lt;<span class="built_in">NSObject</span>&gt;的对象。</span><br></pre></td></tr></table></figure>
 
       
     </div>
@@ -468,8 +470,33 @@
         </nav>
 
         
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
 
         <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://www.github.com/intMax" target="_blank">
+                  
+                    <i class="fa fa-github"></i> GitHub
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www:weibo.com/_intMax" target="_blank">
+                  
+                    <i class="fa fa-weibo"></i> Weibo
+                  
+                </a>
+              </span>
+            
           
         </div>
 
@@ -514,7 +541,7 @@
       <div class="footer-inner">
         <div class="copyright" >
   
-  &copy; 
+  &copy;  2015 - 
   <span itemprop="copyrightYear">2016</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>

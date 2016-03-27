@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>intMax&#39;Blog</title>
+  <subtitle>an iOS developer&#39;s Blog</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://intMax.github.io/"/>
+  <updated>2016-03-27T10:27:29.000Z</updated>
+  <id>http://intMax.github.io/</id>
+  
+  <author>
+    <name>intMax</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Effective Objective-C 2.0 阅读笔记&lt;三&gt;</title>
+    <link href="http://intMax.github.io/2015/08/30/effective-objective-c-3/"/>
+    <id>http://intMax.github.io/2015/08/30/effective-objective-c-3/</id>
+    <published>2015-08-29T16:00:00.000Z</published>
+    <updated>2016-03-27T10:27:29.000Z</updated>
+    
+    <content type="html">&lt;h2 id=&quot;第五章-内存管理&quot;&gt;&lt;a href=&quot;#第五章-内存管理&quot; class=&quot;headerlink&quot; title=&quot;第五章 内存管理&quot;&gt;&lt;/a&gt;第五章 内存管理&lt;/h2&gt;&lt;p&gt;1.ARC并不会调用&lt;code&gt;retain&lt;/code&gt;、&lt;code&gt;release&lt;/code&gt;等方法，而是直接调用其底层C语言版本&lt;code&gt;objc_retain&lt;/code&gt;等，所以ARC没有普通的OC消息派发机制。&lt;/p&gt;
+&lt;p&gt;2.如果&lt;code&gt;setter&lt;/code&gt;方法像下面这样写，当新值和旧值相同时就程序就会崩溃。&lt;/p&gt;
+&lt;figure class=&quot;highlight objc&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;-(&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt;)setObject:(&lt;span class=&quot;keyword&quot;&gt;id&lt;/span&gt;)object&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    [_object release];&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    _object=[object retain];&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;3.ARC中的命名规则：如果方法名以&lt;code&gt;alloc&lt;/code&gt;、&lt;code&gt;new&lt;/code&gt;、&lt;code&gt;copy&lt;/code&gt;、&lt;code&gt;mutableCopy&lt;/code&gt;开头，则返回对象归调用者所有，否则返回的对象会自动释放。&lt;/p&gt;
+&lt;p&gt;4.dealloc方法里要释放指向其他对象的引用，取消键值观测（KVO）和&lt;code&gt;NSNotificationCenter&lt;/code&gt;通知，不要在这里执行异步任务或应该在正常状态下执行的任务，因为这是的对象已经处于正在回收状态了。&lt;/p&gt;
+&lt;p&gt;5.ARC默认不生成安全处理异常的代码，设置-fobjc-arc-exceptions标志后可以开启，不过会导致应用程序变大，效率变低。&lt;/p&gt;
+&lt;p&gt;6.&lt;code&gt;unsafe_unretain&lt;/code&gt;和&lt;code&gt;weak&lt;/code&gt;都可以用来消除循环引用，区别是前者在引用移除后仍然指向已经回收的对象，后者则会自动设为&lt;code&gt;nil&lt;/code&gt;，所以使用&lt;code&gt;weak&lt;/code&gt;会安全一点，因为向&lt;code&gt;nil&lt;/code&gt;发送消息不会报错。&lt;/p&gt;
+&lt;p&gt;7.利用自动释放池可以避免内存峰值的出现。&lt;/p&gt;
+&lt;h2 id=&quot;第六章-块与大中枢派发&quot;&gt;&lt;a href=&quot;#第六章-块与大中枢派发&quot; class=&quot;headerlink&quot; title=&quot;第六章 块与大中枢派发&quot;&gt;&lt;/a&gt;第六章 块与大中枢派发&lt;/h2&gt;&lt;p&gt;1.下图是块的内部结构：&lt;br&gt;&lt;img src=&quot;/uploads/block.jpg&quot; alt=&quot;image&quot; title=&quot;block&quot;&gt;&lt;br&gt;上图中首个变量是个isa指针，所以块本身是一个对象。那么块和普通函数有什么区别呢？除了块是个对象外，其实最大的区别就是块比函数多了个上下文环境，块内部可以调用外部的变量，对应上图的&lt;code&gt;variables&lt;/code&gt;，而&lt;code&gt;descriptor&lt;/code&gt;内部则会对捕获的变量进行管理。&lt;/p&gt;
+&lt;p&gt;2.块分为全局块（&lt;code&gt;NSConcreteGlobalBlock&lt;/code&gt;）、栈块（&lt;code&gt;NSConcreteStackBlock&lt;/code&gt;）、堆块（&lt;code&gt;NSConcreteMallocBlock&lt;/code&gt;），在ARC中只有全局块和堆块了。&lt;/p&gt;
+&lt;p&gt;3.利用&lt;code&gt;typedef&lt;/code&gt;创建块，然后将handler块作为参数传给方法，以降低代码分散程度。这种方法编写类的时候特别要注意块的保留环，记得要把块在适当时机释放掉，解除保留环。在AFNetworking中，是把所有competition块保存在字典中，当请求结束时，再移除，其他开源库的做法也都大同小异。&lt;/p&gt;
+&lt;p&gt;4.GCD和&lt;code&gt;NSOperationQueue&lt;/code&gt;：前者是纯C的API，且更加轻量，后者是Objective-C对象，可以取消操作、设置依赖关系、同一队列中各操作的优先级设置。&lt;/p&gt;
+&lt;p&gt;5.不要使用&lt;code&gt;dispatch_get_current_queue&lt;/code&gt;，因为往往A线程里面又有B线程，所以在B中检测当前线程就会产生歧义。&lt;/p&gt;
+&lt;h2 id=&quot;第七章-系统框架&quot;&gt;&lt;a href=&quot;#第七章-系统框架&quot; class=&quot;headerlink&quot; title=&quot;第七章 系统框架&quot;&gt;&lt;/a&gt;第七章 系统框架&lt;/h2&gt;&lt;p&gt;1.多用块枚举，少用for循环，另外也可以使用for in这种快速遍历的方法。&lt;/p&gt;
+&lt;p&gt;2.&lt;code&gt;load&lt;/code&gt;和&lt;code&gt;initialize&lt;/code&gt;里面的代码一定要精简。不要在里面调用其他类的方法，因为多个类之间执行&lt;code&gt;load&lt;/code&gt;的顺序是不确定的，而且&lt;code&gt;load&lt;/code&gt;不参与继承机制。&lt;code&gt;initialize&lt;/code&gt;会在类被第一次调用时执行一次，和&lt;code&gt;load&lt;/code&gt;一样，不要再里面调用其他类的方法。&lt;/p&gt;
+&lt;p&gt;3.&lt;code&gt;NSTimer&lt;/code&gt;会保留目标对象，所以很容易造成循环引用，调用&lt;code&gt;invalidate&lt;/code&gt;方法可以使timer失效，但是别把这项工作交给调用者，你永远无法保证调用者一定会调用&lt;code&gt;invalidate&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&quot;结语&quot;&gt;&lt;a href=&quot;#结语&quot; class=&quot;headerlink&quot; title=&quot;结语&quot;&gt;&lt;/a&gt;结语&lt;/h2&gt;&lt;p&gt;这本书其实早就看完了，写这几篇博客时，这本书差不多看了快三遍了，里面很多知识点对提升编程质量还是很有帮助的，在看一些开源iOS框架的时候，很多细节上的处理都能在这本书上找到解释。&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;第五章-内存管理&quot;&gt;&lt;a href=&quot;#第五章-内存管理&quot; class=&quot;headerlink&quot; title=&quot;第五章 内存管理&quot;&gt;&lt;/a&gt;第五章 内存管理&lt;/h2&gt;&lt;p&gt;1.ARC并不会调用&lt;code&gt;retain&lt;/code&gt;、&lt;code&gt;release&lt;/c
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://intMax.github.io/categories/iOS/"/>
+    
+    
+      <category term="阅读笔记" scheme="http://intMax.github.io/tags/%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Effective Objective-C 2.0 阅读笔记&lt;二&gt;</title>
+    <link href="http://intMax.github.io/2015/08/02/effective-objective-c-2/"/>
+    <id>http://intMax.github.io/2015/08/02/effective-objective-c-2/</id>
+    <published>2015-08-01T16:00:00.000Z</published>
+    <updated>2016-03-27T10:29:02.000Z</updated>
+    
+    <content type="html">&lt;h2 id=&quot;第三章-接口与API设计&quot;&gt;&lt;a href=&quot;#第三章-接口与API设计&quot; class=&quot;headerlink&quot; title=&quot;第三章 接口与API设计&quot;&gt;&lt;/a&gt;第三章 接口与API设计&lt;/h2&gt;&lt;p&gt;1.Objective-C没有命名空间，所以在命名上最好加上前缀以减小冲突的可能，前缀建议采用三个字母（苹果保留使用所有两个字母前缀的权利）。在开发自己的类库时如果用了其他第三方类库，最好将第三方类库也加上前缀，这样可以让使用者使用你的类库的同时也用你的类库中用到第三方类库（有点绕. . .）。&lt;/p&gt;
+&lt;p&gt;2.覆写&lt;code&gt;description&lt;/code&gt;方法，打印出一些有用信息帮助调试。&lt;/p&gt;
+&lt;p&gt;3.封装一个对象时，对外公开属性最好是只读(&lt;code&gt;readonly&lt;/code&gt;)的，如果要在内部修改可在对象内部重新声明为readwrite。这种模式在AFNetworking有着大量的应用。&lt;/p&gt;
+&lt;p&gt;4.私有方法最好加上前缀(p&lt;em&gt; )，前缀不要只用一个下划线(&lt;/em&gt;)，这种做法是苹果预留的。&lt;/p&gt;
+&lt;p&gt;5.容器类对象默认执行的是浅拷贝，若要执行深拷贝需要自己编写相关方法。&lt;/p&gt;
+&lt;h2 id=&quot;第四章-协议与分类&quot;&gt;&lt;a href=&quot;#第四章-协议与分类&quot; class=&quot;headerlink&quot; title=&quot;第四章 协议与分类&quot;&gt;&lt;/a&gt;第四章 协议与分类&lt;/h2&gt;&lt;p&gt;1.委托属性常用weak来修饰；一个协议里的方法是&lt;code&gt;optional&lt;/code&gt;的，需要先判断委托对象是否实现改方法，如果经常需要判断则可考虑做个缓存。&lt;/p&gt;
+&lt;p&gt;2.&lt;code&gt;weak&lt;/code&gt;和&lt;code&gt;unsafe_unretain&lt;/code&gt;的区别是前者在相关对象销毁时需要自动清空，后者则不需要。&lt;/p&gt;
+&lt;p&gt;3.分类中不要添加属性，必须添加的话可以采用关联对象机制模拟，不推荐。分类的设计初衷是扩展类的功能，而属性是用于数据的封装，因此，属性最好定义在主接口中。&lt;/p&gt;
+&lt;p&gt;4.&lt;code&gt;class-continuation&lt;/code&gt;分类（在其他地方看到过叫匿名分类），这本书多次提到了这个概念，对应的部分是：&lt;br&gt;&lt;figure class=&quot;highlight objc&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//SonClass.h&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;@interface&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;SonClass&lt;/span&gt; : &lt;span class=&quot;title&quot;&gt;FatherClass&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;@end&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//SonClass.m&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;@interface&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;SonClass&lt;/span&gt;()&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//class-continuation分类&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;@end&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;5.&lt;code&gt;class-continuation&lt;/code&gt;分类可以用来隐藏实现细节，如系统的WebKit其实大部分是C++编写的，但是对外展示的却是一套整洁的Objective-C接口。&lt;/p&gt;
+&lt;p&gt;6.匿名对象，常见的有：&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;@property (nonatomic, weak) id&amp;lt;MyDelegate&amp;gt; delegate;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;这句话的意思是delegate遵循MyDelegate协议，至于它本身是什么类不关心。匿名分类也可以用来对一些第三方类库进行一些简单封装：&lt;br&gt;&lt;figure class=&quot;highlight objc&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;@protocol&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;MyDatabaseConnection&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;-(&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt;)connect;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;-(&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt;)disconnect;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;-(&lt;span class=&quot;built_in&quot;&gt;BOOL&lt;/span&gt;)isConnected;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;-(&lt;span class=&quot;built_in&quot;&gt;NSArray&lt;/span&gt; *)performQuery:(&lt;span class=&quot;built_in&quot;&gt;NSString&lt;/span&gt;*)query;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;@end&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//使用&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;@ protocol MyDatabaseConnection;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;@interface&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;MyDatabaseManager&lt;/span&gt; : &lt;span class=&quot;title&quot;&gt;NSObject&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;+sharedInstance;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;-(&lt;span class=&quot;keyword&quot;&gt;id&lt;/span&gt;&amp;lt;MyDatabaseConnection&amp;gt;)connectionWithIdentifier:(&lt;span class=&quot;built_in&quot;&gt;NSString&lt;/span&gt;*)identifier;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;@end&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;这里隐藏了数据库连接所用的类（可能来自不同框架），而且在后续中，无需改变公共API，就能切换后端实现类。&lt;/p&gt;
+&lt;p&gt;6.关于匿名分类的一个面试题：&lt;/p&gt;
+&lt;figure class=&quot;highlight objc&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;id&lt;/span&gt;、&lt;span class=&quot;keyword&quot;&gt;id&lt;/span&gt;&amp;lt;&lt;span class=&quot;built_in&quot;&gt;NSObject&lt;/span&gt;&amp;gt;、&lt;span class=&quot;built_in&quot;&gt;NSObject&lt;/span&gt;的区别&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;NSObject&lt;/span&gt;：就是用来定义&lt;span class=&quot;built_in&quot;&gt;NSObject&lt;/span&gt;对象的。&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;id&lt;/span&gt;：它就是一个指针，它可以指向的类型不仅限于&lt;span class=&quot;built_in&quot;&gt;NSObject&lt;/span&gt;，如&lt;span class=&quot;built_in&quot;&gt;NSProxy&lt;/span&gt;。&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;id&lt;/span&gt;&amp;lt;&lt;span class=&quot;built_in&quot;&gt;NSObject&lt;/span&gt;&amp;gt;：它指向的对象要求实现&lt;span class=&quot;built_in&quot;&gt;NSObject&lt;/span&gt;所实现的协议，所以说它可以定义&lt;span class=&quot;built_in&quot;&gt;NSObject&lt;/span&gt;、&lt;span class=&quot;built_in&quot;&gt;NSProxy&lt;/span&gt;（它也实现了&amp;lt;&lt;span class=&quot;built_in&quot;&gt;NSObject&lt;/span&gt;&amp;gt;）或者其他实现了&amp;lt;&lt;span class=&quot;built_in&quot;&gt;NSObject&lt;/span&gt;&amp;gt;的对象。&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;第三章-接口与API设计&quot;&gt;&lt;a href=&quot;#第三章-接口与API设计&quot; class=&quot;headerlink&quot; title=&quot;第三章 接口与API设计&quot;&gt;&lt;/a&gt;第三章 接口与API设计&lt;/h2&gt;&lt;p&gt;1.Objective-C没有命名空间，所以在命名上最好加上
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://intMax.github.io/categories/iOS/"/>
+    
+    
+      <category term="阅读笔记" scheme="http://intMax.github.io/tags/%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Effective Objective-C 2.0 阅读笔记&lt;一&gt;</title>
+    <link href="http://intMax.github.io/2015/07/15/effective-objective-c-1/"/>
+    <id>http://intMax.github.io/2015/07/15/effective-objective-c-1/</id>
+    <published>2015-07-14T16:00:00.000Z</published>
+    <updated>2016-03-27T10:27:29.000Z</updated>
+    
+    <content type="html">&lt;h2 id=&quot;第一章-熟悉Objective-C&quot;&gt;&lt;a href=&quot;#第一章-熟悉Objective-C&quot; class=&quot;headerlink&quot; title=&quot;第一章 熟悉Objective-C&quot;&gt;&lt;/a&gt;第一章 熟悉Objective-C&lt;/h2&gt;&lt;p&gt;1.OC使用动态绑定的消息结构，在runtime才会检查对象类型、决定执行何种代码。runtime是很多功能的基础，如分类、动态添加类等&lt;/p&gt;
+&lt;p&gt;2.@class可以向前声明一个类，类似的还有@protocol，这两个关键字告诉编译器我是有这个类或者协议的。&lt;/p&gt;
+&lt;p&gt;3.#import不会引起引用头文件死循环和重复引用，它会自动让其中一个失效，而#include用来引用C或C++类型的头文件，会引起死循环。&lt;/p&gt;
+&lt;p&gt;4.考虑以下代码：&lt;br&gt;&lt;figure class=&quot;highlight objc&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;id&lt;/span&gt; obj1=&lt;span class=&quot;comment&quot;&gt;/*. . .*/&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;id&lt;/span&gt; obj2=&lt;span class=&quot;comment&quot;&gt;/*. . .*/&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;id&lt;/span&gt; obj3=&lt;span class=&quot;comment&quot;&gt;/*. . .*/&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;NSArray&lt;/span&gt; *arrayA=[&lt;span class=&quot;built_in&quot;&gt;NSArray&lt;/span&gt; arrayWithObjects:obj1,obj2,obj3,&lt;span class=&quot;literal&quot;&gt;nil&lt;/span&gt;];&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;NSArray&lt;/span&gt; *arrayB=@[obj1,obj2,obj3];&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;如果obj2=nil会怎样？显然后者初始化数组会报错，而前者虽然不会报错，但是将只有一个对象ojb1。对于前者这很可能不是我们想要的结果，会导致后面出现bug很难追踪，所以推荐使用后者的方式初始化，这样就能尽快定位到问题所在。&lt;/p&gt;
+&lt;p&gt;5.多用类型常量，少用#define预处理命令。用extern关键字可对外公开某个常量，AFNetworking中常用这种方式来对外公布一个NSNotification标识符。&lt;/p&gt;
+&lt;p&gt;6.枚举尽量用NS_ENUM和NS_OPTIONS宏来定义，这样可以确保枚举是指定的数据类型来实现的。后者还可进行按位或、按位与运算&lt;/p&gt;
+&lt;h2 id=&quot;第二章-对象、消息、运行期&quot;&gt;&lt;a href=&quot;#第二章-对象、消息、运行期&quot; class=&quot;headerlink&quot; title=&quot;第二章 对象、消息、运行期&quot;&gt;&lt;/a&gt;第二章 对象、消息、运行期&lt;/h2&gt;&lt;p&gt;1.@synthesis和@dynamic，前者会由编译器在编译期间自动生成getter、setter（假设属性是readwrite），后者告诉编译器，不自动生成getter/setter方法，避免编译期间产生警告。自定义getter、setter可以选择重载他们，也可以在利用runtime期的消息转发机制来实现。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这里插两点：第一，不要在重载的setter方法里有这样的写法self.property=property，应该改为_property=property，否则会引起一个无限循环，这本书在这里的写法是错误的。那么如果要在子类重载这个setter方法该怎么办呢？子类没有_property这个实例变量。这时，可以在子类的实现文件中加上@synthesize property = _property。其实我一开始的想法是用self-&amp;gt;_property来访问的，但是编译不通过。第二，如果同时覆写了getter和setter方法，那么属性对应的实例变量就不存在了，需要自己手动添加。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;2.在对象外部总是应该通过属性来访问实例变量，那么在对象内部呢？直接用实例变量访问速度快，但是会绕过属性特质（copy等），更重要的是不会触发KVO。这本书给的建议的是：写入实例变量时应该用setter方法，而在读取时则直接访问。&lt;/p&gt;
+&lt;p&gt;3.尽量避免将可变对象放入容器，容器内部会根据哈希码来对各个对象进行分箱，这意味着在对象被放入容器的时候已经被分好了，如果后来改变了对象，哈希码也会随着改变，这样，之前的分箱就有问题了。&lt;/p&gt;
+&lt;p&gt;4.类簇，系统框架中普遍使用了这种模式，如UIButton、NSArray等。以前做网站的时候用过工厂模式，其实类簇基类的内部就是一个工厂，根据传入的参数分别创建相应的对象。相信平常接触比较多的是分类而非类簇，那么两者有什么区别呢？首先，类簇可以隐藏基类背后的具体实现（当然，由于runtime的存在，想要真正隐藏是不可能的），其次，可以用isKindOfClass和isMemberOfClass试试看声明出来的对象是否属于对应的类。类簇声明的对象永远不可能是该基类。&lt;br&gt;&lt;figure class=&quot;highlight objc&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;id&lt;/span&gt; maybeAnArray=&lt;span class=&quot;comment&quot;&gt;/*. . .*/&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt;([maybeAnArray class] == [&lt;span class=&quot;built_in&quot;&gt;NSArray&lt;/span&gt; class])&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//will never be hit&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt;([[maybeAnArray class] isKindOfClass:[&lt;span class=&quot;built_in&quot;&gt;NSArray&lt;/span&gt; class]])&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//will be hit&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;5.对象关联机制，运用这种机制可以给分类模拟添加属性，不同属性可以用“键”来区分，属性特质可以用关联类型来表示（OBJC_ASSOCIATION_COPY等）。但是建议不到万不得已的时候不要用这种方法，否则出现“保留环”等内存bug将很难追踪。&lt;/p&gt;
+&lt;p&gt;6.消息转发机制&lt;br&gt;&lt;img src=&quot;/uploads/forwarding.jpg&quot; alt=&quot;image&quot; title=&quot;forwarding&quot;&gt;&lt;br&gt;在重写forwardInvocation:时，也要重写methodSignatureForSelector:方法，用来返回相应的方法签名，便于生成一个NSInvocation传递给forwardInvocation:。最后消息未能处理会调用NSObjec的doseNotRecognizeSelector:方法抛出异常。消息传递越往后消耗越大，像@dynamic在resolveInstanceMethod:阶段就可以完成。模拟多继承可以在forwardingTargetForSelector:完成。&lt;/p&gt;
+&lt;p&gt;7.方法混写可以交换两个方法的实现、替代原方法的实现等，这项技术一般用于调试，但是最近在看AFNetworking源码时发现，他也用了这项技术，NSURLSessionTask是一个类簇，在iOS7、iOS8中内部继承关系有点不一样，所以用到了这项技术来替换原有的resume、suspend方法。&lt;/p&gt;
+&lt;p&gt;8.类对象，每个对象有一个isa指针，指向对应的类，其结构如下：&lt;br&gt;&lt;figure class=&quot;highlight objc&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;struct&lt;/span&gt; objc_class *Class;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;struct&lt;/span&gt; objc_object &amp;#123;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Class isa;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125; *&lt;span class=&quot;keyword&quot;&gt;id&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;struct&lt;/span&gt; objc_class &amp;#123;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Class isa;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Class super_class;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;const&lt;/span&gt; charchar *name;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;long&lt;/span&gt; version;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;long&lt;/span&gt; info;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;long&lt;/span&gt; instance_size;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;struct&lt;/span&gt; objc_ivar_list *ivars;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;struct&lt;/span&gt; objc_method_list **methodLists;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;struct&lt;/span&gt; objc_cache *cache;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;struct&lt;/span&gt; objc_protocol_list *protocols;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;显然Class本身也是个对象，它指向一个叫“元类（metaclass）”的类，类方法就定义在这里。元类的继承关系和类一样，它继承自父类的元类。根类的元类指针指向自己，从而形成闭环。&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;第一章-熟悉Objective-C&quot;&gt;&lt;a href=&quot;#第一章-熟悉Objective-C&quot; class=&quot;headerlink&quot; title=&quot;第一章 熟悉Objective-C&quot;&gt;&lt;/a&gt;第一章 熟悉Objective-C&lt;/h2&gt;&lt;p&gt;1.OC使用动态绑定
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://intMax.github.io/categories/iOS/"/>
+    
+    
+      <category term="阅读笔记" scheme="http://intMax.github.io/tags/%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+</feed>
