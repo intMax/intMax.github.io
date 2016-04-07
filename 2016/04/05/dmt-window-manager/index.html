@@ -1,0 +1,828 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="0T85hMCHTBPMm7VxqqQavADiP_f9EVNTs1diws9Yr0k" />
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="实用技巧," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="intMax'Blog" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="背景场景一打开App时，不同组件会根据运营的要求弹出各自的活动弹窗，最简单的做法是每个组件自己把活动视图makeKeyAndVisbile设为keyWindow，或者[keyWindow addSubview:]，但是这样就出现了谁先谁后的问题，这时，组件的开发人员就需要和对应的运营确认哪个活动优先级更高。优先级高的显示完了，还要通知优先级低的，下一个活动时，发现两个组件弹窗的优先级被调换了一下，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="根据View的优先级有序展示在Window上">
+<meta property="og:url" content="http://intMax.github.io/2016/04/05/dmt-window-manager/index.html">
+<meta property="og:site_name" content="intMax'Blog">
+<meta property="og:description" content="背景场景一打开App时，不同组件会根据运营的要求弹出各自的活动弹窗，最简单的做法是每个组件自己把活动视图makeKeyAndVisbile设为keyWindow，或者[keyWindow addSubview:]，但是这样就出现了谁先谁后的问题，这时，组件的开发人员就需要和对应的运营确认哪个活动优先级更高。优先级高的显示完了，还要通知优先级低的，下一个活动时，发现两个组件弹窗的优先级被调换了一下，">
+<meta property="og:image" content="http://intMax.github.io/uploads/demo.gif">
+<meta property="og:image" content="http://intMax.github.io/uploads/DMTWindowManager.jpg">
+<meta property="og:updated_time" content="2016-04-07T13:21:14.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="根据View的优先级有序展示在Window上">
+<meta name="twitter:description" content="背景场景一打开App时，不同组件会根据运营的要求弹出各自的活动弹窗，最简单的做法是每个组件自己把活动视图makeKeyAndVisbile设为keyWindow，或者[keyWindow addSubview:]，但是这样就出现了谁先谁后的问题，这时，组件的开发人员就需要和对应的运营确认哪个活动优先级更高。优先级高的显示完了，还要通知优先级低的，下一个活动时，发现两个组件弹窗的优先级被调换了一下，">
+<meta name="twitter:image" content="http://intMax.github.io/uploads/demo.gif">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 根据View的优先级有序展示在Window上 | intMax'Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-75599060-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+
+
+  <div style="display: none;">
+    <script src="http://s6.cnzz.com/stat.php?id=1256007767&web_id=1256007767" type="text/javascript"></script>
+  </div>
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">intMax'Blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">an iOS developer's Blog</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-rss">
+          <a href="/atom.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-rss fa-fw"></i> <br />
+            
+            RSS
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-friendship">
+          <a href="https://seewhy.me" rel="section">
+            
+              <i class="menu-item-icon fa fa-heartbeat fa-fw"></i> <br />
+            
+            seewhy'Blog
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                根据View的优先级有序展示在Window上
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-04-05T00:00:00+08:00" content="2016-04-05">
+              2016-04-05
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/04/05/dmt-window-manager/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/05/dmt-window-manager/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><h3 id="场景一"><a href="#场景一" class="headerlink" title="场景一"></a>场景一</h3><p>打开App时，不同组件会根据运营的要求弹出各自的活动弹窗，最简单的做法是每个组件自己把活动视图<code>makeKeyAndVisbile</code>设为keyWindow，或者<code>[keyWindow addSubview:]</code>，但是这样就出现了谁先谁后的问题，这时，组件的开发人员就需要和对应的运营确认哪个活动优先级更高。优先级高的显示完了，还要通知优先级低的，下一个活动时，发现两个组件弹窗的优先级被调换了一下，崩溃…</p>
+<h3 id="场景二"><a href="#场景二" class="headerlink" title="场景二"></a>场景二</h3><p>如果说场景一的需求太少见（的确，哪个产品会让用户一进App看两个弹窗？），这个场景似乎很常见。在用户使用的过程中，用户触发了两个弹窗，如一个提示，一个普通弹窗，用<code>makeKeyAndVisbile</code>的方法倒还好，顶多就是遮住了提示，要是用了<code>[keyWindow addSubview:]</code>的话，你可能会蛋疼的不要的不要的，因为大多数App使用的提示都会统一封装一下，而且大多数是用<code>makeKeyAndVisbile</code>将其作为keyWindow显示在最上面</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>关于场景一，虽然少见，但也很好解决，给这种活动弹窗设置一个类似<code>UIWindowLevel</code>的优先级属性，让运营自己定，我们只需要提供一个统一的管理活动弹窗的类，让弹窗根据优先级自己一个一个弹。关于第二个场景，我的想法是限制各组件的视图轻易的成为keyWindow，提供一个入口给那些想显示在最上面的视图，这样我们内部就可以通过一个FIFO的队列来维护秩序，当然也可以通过设置高优先级来插队。有时候，我们在使用时可能需要知道当前队列中的状况，我们可以KVO内部这个队列。效果图：<br><img src="/uploads/demo.gif" alt="image" title="DMTWindowManagerDemo"></p>
+<h2 id="一点说明"><a href="#一点说明" class="headerlink" title="一点说明"></a>一点说明</h2><p>下面这小节可以选择跳过<a href="#code">skip</a>，这里写的零零碎碎的，真的要储备建议看下官方文档。当然，大致浏览下是没什么问题的。<br>参考文献：<a href="https://developer.apple.com/library/ios/documentation/UIKit/Reference/UIWindow_Class/index.html#//apple_ref/occ/cl/UIWindow" target="_blank" rel="external">UIWindow</a>、<br><a href="https://developer.apple.com/library/ios/documentation/Cocoa/Conceptual/KeyValueCoding/Articles/AccessorConventions.html#//apple_ref/doc/uid/20002174-BAJEAIEE" target="_blank" rel="external">Key-Value Coding Accessor Methods</a>、<a href="https://developer.apple.com/library/mac/documentation/Cocoa/Reference/Foundation/Protocols/NSKeyValueObserving_Protocol/index.html" target="_blank" rel="external">NSKeyValueObserving</a></p>
+<h2 id="知识储备"><a href="#知识储备" class="headerlink" title="知识储备"></a>知识储备</h2><h3 id="UIWindow"><a href="#UIWindow" class="headerlink" title="UIWindow"></a>UIWindow</h3><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 几个属性 */</span></span><br><span class="line"><span class="keyword">@property</span>(<span class="keyword">nonatomic</span>) <span class="built_in">UIWindowLevel</span> windowLevel;</span><br><span class="line"><span class="keyword">@property</span>(<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="built_in">UIScreen</span> *screen;<span class="comment">// screen一旦被显示，替换的成本是很高的，但在没有显示前更改是有不会太多消耗的</span></span><br><span class="line"><span class="keyword">@property</span>(<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="built_in">UIViewController</span> *rootViewController;</span><br><span class="line"><span class="keyword">@property</span>(<span class="keyword">nonatomic</span>, <span class="keyword">readonly</span>, getter=isKeyWindow) <span class="built_in">BOOL</span> keyWindow;</span><br><span class="line"><span class="comment">/* 操作window的一些方法 */</span></span><br><span class="line">- (<span class="keyword">void</span>)makeKeyAndVisible;</span><br><span class="line">- (<span class="keyword">void</span>)becomeKeyWindow;<span class="comment">// 系统会在window成为keyWindow时自动调用，不要手动调用</span></span><br><span class="line">- (<span class="keyword">void</span>)makeKeyWindow;</span><br><span class="line">- (<span class="keyword">void</span>)resignKeyWindow;<span class="comment">// 系统会在keyWindow注销时自动调用，不要手动调用</span></span><br><span class="line"><span class="comment">/* 坐标转换 */</span></span><br><span class="line">- (<span class="built_in">CGPoint</span>)convertPoint:(<span class="built_in">CGPoint</span>)point toWindow:(<span class="built_in">UIWindow</span> *)window;</span><br><span class="line">- (<span class="built_in">CGPoint</span>)convertPoint:(<span class="built_in">CGPoint</span>)point fromWindow:(<span class="built_in">UIWindow</span> *)window;</span><br><span class="line">- (<span class="built_in">CGRect</span>)convertRect:(<span class="built_in">CGRect</span>)rect toWindow:(<span class="built_in">UIWindow</span> *)window;</span><br><span class="line">- (<span class="built_in">CGRect</span>)convertRect:(<span class="built_in">CGRect</span>)rect fromWindow:(<span class="built_in">UIWindow</span> *)window;</span><br><span class="line"><span class="comment">/* 所有的事件都是UIApplication传递给UIWindow的这个方法分发下去的 */</span></span><br><span class="line">- (<span class="keyword">void</span>)sendEvent:(<span class="built_in">UIEvent</span> *)event;</span><br></pre></td></tr></table></figure>
+<p>很简单的一个类，当我们需要显示一个window时，只需要<code>[window makeKeyAndVisible]</code>或者<code>[window setHidden:YES]</code>即可。</p>
+<h3 id="Key-Value-Coding-实现KVO集合类型的属性"><a href="#Key-Value-Coding-实现KVO集合类型的属性" class="headerlink" title="Key-Value Coding 实现KVO集合类型的属性"></a>Key-Value Coding 实现KVO集合类型的属性</h3><p>KVO一个NSString、NSNumber等类型的一些属性时，我们的做法是这样的：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 添加观察者</span></span><br><span class="line">[Foo addObserver:<span class="keyword">self</span> forKeyPath:path options:options context:context];</span><br><span class="line"><span class="comment">// 实现该方法，接收变化</span></span><br><span class="line">- (<span class="keyword">void</span>)observeValueForKeyPath:(<span class="built_in">NSString</span> *)keyPath ofObject:(<span class="keyword">id</span>)object change:(<span class="built_in">NSDictionary</span>&lt;<span class="built_in">NSString</span> *,<span class="keyword">id</span>&gt; *)change context:(<span class="keyword">void</span> *)context</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span>([keyPath isEqualToString:yourPath])&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"%@"</span>, change);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        [<span class="keyword">super</span> observeValueForKeyPath:keyPath ofObject:object change:change context:context];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 移除观察者</span></span><br><span class="line">[Foo removeObserver:<span class="keyword">self</span> forKeyPath:path context:context];</span><br></pre></td></tr></table></figure>
+<p>但是当你的属性是个NSArray、NSSet、NSDictionary等集合类型时，你会发现当你添加或者移除元素时并不能接收到变化。因为KVO的本质是系统监测到某个属性的内存地址或常量改变时，会添加上<code>- (void)willChangeValueForKey:(NSString *)key</code><br>和<code>- (void)didChangeValueForKey:(NSString *)key</code>方法来发送通知，所以一种解决方法是手动调用者两个方法，但是并不推荐，你永远无法像系统一样真正知道这个元素什么时候被改变。另一种便是利用Key-Value Coding：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 有序不可变集合，如NSArray</span></span><br><span class="line">-countOf&lt;Key&gt;必须实现</span><br><span class="line">-objectIn&lt;Key&gt;AtIndex: or -&lt;key&gt;AtIndexes:实现其中一个</span><br><span class="line">-get&lt;Key&gt;:range:可选，提升性能</span><br><span class="line"></span><br><span class="line"><span class="comment">// 有序可变集合，如NSMutableArray</span></span><br><span class="line">-insertObject:<span class="keyword">in</span>&lt;Key&gt;AtIndex: or -insert&lt;Key&gt;:atIndexes:实现至少一个</span><br><span class="line">-removeObjectFrom&lt;Key&gt;AtIndex: or -remove&lt;Key&gt;AtIndexes:实现至少一个</span><br><span class="line">-replaceObjectIn&lt;Key&gt;AtIndex:withObject: or -replace&lt;Key&gt;AtIndexes:with&lt;Key&gt;:可选</span><br><span class="line"><span class="comment">// 需要利用mutableArrayValueForKey:返回的代理操作，如[[self mutableArrayValueForKey:@"key"] addObject:foo];</span></span><br></pre></td></tr></table></figure>
+<h2 id="上代码"><a href="#上代码" class="headerlink" title="上代码"></a>上代码<a name="code"></a></h2><p>先看下整个流程吧：</p>
+<p><img src="/uploads/DMTWindowManager.jpg" alt="image" title="DMTWindowManager"></p>
+<p>整个流程很简单，使用者只要传入一个View和一个可选的Config，内部会自动根据优先级显示，在移除一个View后，会自动显示下一个，直到没有View可以显示。</p>
+<p><code>DMTWindowConfig</code>里面包含了一些对应View的配置信息，这里只是个Demo，东西比较少，可以根据项目实际情况再配一些：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">DMTWindowConfig</span> : <span class="title">NSObject</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">assign</span>) <span class="built_in">UIWindowLevel</span> windowLevel;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">assign</span>) <span class="built_in">BOOL</span> animation;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">assign</span>) <span class="built_in">BOOL</span> ignoreHit;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>, <span class="keyword">readonly</span>) DMTWindowAnimationHandler addAnimationHandler;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>, <span class="keyword">readonly</span>) DMTWindowAnimationHandler removeAnimationHandler;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p><code>DMTWindowManager</code>内部维护一个队列，这里的队列其实是个假队列，就是一个NSMutableArray类型的容器，只是在取值的时候支持了FIFO和插队的特性：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="built_in">UIView</span> *)_getNextView</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">self</span>.queue.count &lt;= <span class="number">0</span> || <span class="keyword">self</span>.configs.count &lt;= <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">UIView</span> *ret = <span class="literal">nil</span>;</span><br><span class="line">    <span class="built_in">NSInteger</span> index = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="keyword">self</span>.configs.count; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span>([<span class="keyword">self</span>.configs[i] windowLevel] &gt; [<span class="keyword">self</span>.configs[index] windowLevel])&#123;</span><br><span class="line">            index = i;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ret = [<span class="keyword">self</span>.queue objectAtIndex:index];</span><br><span class="line">    <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)_enqueue:(<span class="built_in">UIView</span> *)view config:(DMTWindowConfig *)config</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">@synchronized</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">        [[<span class="keyword">self</span> mutableArrayValueForKey:kViewQueueObserveKeyPath] addObject:view];</span><br><span class="line">        [<span class="keyword">self</span>.configs addObject:config];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)_dequeue:(<span class="built_in">UIView</span> *)view</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">self</span>.queue.count &lt;= <span class="number">0</span> || <span class="keyword">self</span>.configs.count &lt;= <span class="number">0</span> || ![<span class="keyword">self</span>.queue containsObject:view])&#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">@synchronized</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="built_in">NSInteger</span> index = [<span class="keyword">self</span>.queue indexOfObject:view];</span><br><span class="line">        [<span class="keyword">self</span>.configs removeObjectAtIndex:index];</span><br><span class="line">        [[<span class="keyword">self</span> mutableArrayValueForKey:kViewQueueObserveKeyPath] removeObject:view];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果外部需要知道队列中View的添加和移除的情况，可以对<code>kViewQueueObserveKeyPath</code>这个path进行KVO：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 添加观察者</span></span><br><span class="line">[[DMTWindowManager sharedInstance] addObserver:<span class="keyword">self</span> forKeyPath:kViewQueueObserveKeyPath options:option context:<span class="literal">nil</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">// 接收变化</span></span><br><span class="line">- (<span class="keyword">void</span>)observeValueForKeyPath:(<span class="built_in">NSString</span> *)keyPath ofObject:(<span class="keyword">id</span>)object change:(<span class="built_in">NSDictionary</span>&lt;<span class="built_in">NSString</span> *,<span class="keyword">id</span>&gt; *)change context:(<span class="keyword">void</span> *)context</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span>([keyPath isEqualToString:kViewQueueObserveKeyPath])&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"%@"</span>, change);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        [<span class="keyword">super</span> observeValueForKeyPath:keyPath ofObject:object change:change context:context];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 移除观察者</span></span><br><span class="line">[[DMTWindowManager sharedInstance] removeObserver:<span class="keyword">self</span> forKeyPath:kViewQueueObserveKeyPath context:<span class="literal">nil</span>];</span><br></pre></td></tr></table></figure>
+<p>具体的代码请参考<a href="https://github.com/intMax/DMTWindowManager" target="_blank" rel="external">Demo</a></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>整个方案的主要思路是把所有想成为keyWindow的View集中在一起管理，这样就可以有序的展示，也方便增加一些公共的需求，如打点统计等。如有错误，请指正。自从15年秋季校招结束后，很长一段时间没写博客了，一直忙于写业务，只能说需求太饱和了。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/实用技巧/" rel="tag">#实用技巧</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/08/30/effective-objective-c-3/" rel="next" title="Effective Objective-C 2.0 阅读笔记<三>">
+                <i class="fa fa-chevron-left"></i> Effective Objective-C 2.0 阅读笔记<三>
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/04/05/dmt-window-manager/"
+           data-title="根据View的优先级有序展示在Window上" data-url="http://intMax.github.io/2016/04/05/dmt-window-manager/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.png"
+               alt="intMax" style="border-radius: 50px" />
+          <p class="site-author-name" itemprop="name">intMax</p>
+          <p class="site-description motion-element" itemprop="description">Talk is cheap, show me the code</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://www.github.com/intMax" target="_blank">
+                  
+                    <i class="fa fa-github"></i> GitHub
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.weibo.com/2860240432" target="_blank">
+                  
+                    <i class="fa fa-weibo"></i> Weibo
+                  
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#场景一"><span class="nav-number">1.1.</span> <span class="nav-text">场景一</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#场景二"><span class="nav-number">1.2.</span> <span class="nav-text">场景二</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方案"><span class="nav-number">2.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一点说明"><span class="nav-number">3.</span> <span class="nav-text">一点说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#知识储备"><span class="nav-number">4.</span> <span class="nav-text">知识储备</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#UIWindow"><span class="nav-number">4.1.</span> <span class="nav-text">UIWindow</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Key-Value-Coding-实现KVO集合类型的属性"><span class="nav-number">4.2.</span> <span class="nav-text">Key-Value Coding 实现KVO集合类型的属性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#上代码"><span class="nav-number">5.</span> <span class="nav-text">上代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">intMax</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  
+<script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = NexT.utils.escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    NexT.motion.middleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+
+      if (CONFIG.sidebar.display === 'post' || CONFIG.sidebar.display === 'always') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          NexT.utils.displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"intmaxpan"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
