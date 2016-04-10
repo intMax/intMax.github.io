@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://intMax.github.io/"/>
-  <updated>2016-04-07T13:21:14.000Z</updated>
+  <updated>2016-04-10T12:53:05.000Z</updated>
   <id>http://intMax.github.io/</id>
   
   <author>
@@ -14,6 +14,53 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>理解UIButton的imageEdgeInsets和titleEdgeInsets</title>
+    <link href="http://intMax.github.io/2016/04/10/uibutton-edgeinsets/"/>
+    <id>http://intMax.github.io/2016/04/10/uibutton-edgeinsets/</id>
+    <published>2016-04-09T16:00:00.000Z</published>
+    <updated>2016-04-10T12:53:05.000Z</updated>
+    
+    <content type="html">&lt;h2 id=&quot;背景&quot;&gt;&lt;a href=&quot;#背景&quot; class=&quot;headerlink&quot; title=&quot;背景&quot;&gt;&lt;/a&gt;背景&lt;/h2&gt;&lt;p&gt;UIButton在日常开发中经常用到，也经常需要做一些定制，这些定制很简单，就是改变image和title的位置而已，默认的image和title位置是这样的：&lt;br&gt;&lt;img src=&quot;/uploads/pic-0.jpg&quot; alt=&quot;image&quot; title=&quot;pic-0&quot;&gt;&lt;br&gt;但你拿到的设计稿却经常是这样的：&lt;br&gt;&lt;img src=&quot;/uploads/pic-1.jpg&quot; alt=&quot;image&quot; title=&quot;pic-1&quot;&gt;&lt;br&gt;有些朋友可能被“毫无规律”的imageEdgeInsets和titleEdgeInsets虐过，所以用UIImageView和UILabel的组合来代替了。本篇博客希望用最简单粗暴的方式–实验，来了解一下imageEdgeInsets和titleEdgeInsets到底是怎么玩的。这是我实验的&lt;a href=&quot;&quot;&gt;Demo&lt;/a&gt;，帮你免去了改个数据就要cmd-R的烦恼。&lt;/p&gt;
+&lt;h2 id=&quot;contentVerticalAlignment和contentHorizontalAlignment&quot;&gt;&lt;a href=&quot;#contentVerticalAlignment和contentHorizontalAlignment&quot; class=&quot;headerlink&quot; title=&quot;contentVerticalAlignment和contentHorizontalAlignment&quot;&gt;&lt;/a&gt;contentVerticalAlignment和contentHorizontalAlignment&lt;/h2&gt;&lt;p&gt;这两个属性是UIControl的，是用来排列内部元素的，用好他们，可以让我们的计算轻松一点。先来看看他们的值：&lt;br&gt;&lt;figure class=&quot;highlight objc&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;built_in&quot;&gt;NS_ENUM&lt;/span&gt;(&lt;span class=&quot;built_in&quot;&gt;NSInteger&lt;/span&gt;, &lt;span class=&quot;built_in&quot;&gt;UIControlContentVerticalAlignment&lt;/span&gt;) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;built_in&quot;&gt;UIControlContentVerticalAlignmentCenter&lt;/span&gt;  = &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;built_in&quot;&gt;UIControlContentVerticalAlignmentTop&lt;/span&gt;     = &lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;built_in&quot;&gt;UIControlContentVerticalAlignmentBottom&lt;/span&gt;  = &lt;span class=&quot;number&quot;&gt;2&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;built_in&quot;&gt;UIControlContentVerticalAlignmentFill&lt;/span&gt;    = &lt;span class=&quot;number&quot;&gt;3&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;built_in&quot;&gt;NS_ENUM&lt;/span&gt;(&lt;span class=&quot;built_in&quot;&gt;NSInteger&lt;/span&gt;, &lt;span class=&quot;built_in&quot;&gt;UIControlContentHorizontalAlignment&lt;/span&gt;) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;built_in&quot;&gt;UIControlContentHorizontalAlignmentCenter&lt;/span&gt; = &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;built_in&quot;&gt;UIControlContentHorizontalAlignmentLeft&lt;/span&gt;   = &lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;built_in&quot;&gt;UIControlContentHorizontalAlignmentRight&lt;/span&gt;  = &lt;span class=&quot;number&quot;&gt;2&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;built_in&quot;&gt;UIControlContentHorizontalAlignmentFill&lt;/span&gt;   = &lt;span class=&quot;number&quot;&gt;3&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;4x4总共16种选择，只截了其中4种效果，默认是第一种，其他效果自行脑补：&lt;br&gt;&lt;img src=&quot;/uploads/pic-2.jpg&quot; alt=&quot;image&quot; title=&quot;pic-2&quot;&gt;&lt;br&gt;这里有个令人困惑的地方是，为什么选择UIControlContentHorizontalAlignmentFill时，image和title是这种样子的，而不是想象中的填满。这里可以告诉大家，如果只有image时，完全就是大家想象中的样子，如果只有title时，和UIControlContentHorizontalAlignmentLeft的效果一样，都居左，原因是，title不能像图片一样被拉伸，而只能在宽度被偏小时显示&lt;code&gt;...&lt;/code&gt;。至于image和title同时存在时，为什么会是这样，在下一节会解释。&lt;/p&gt;
+&lt;p&gt;接下来说下我个人是怎么来让计算轻松点的吧，我会把&lt;code&gt;contentVerticalAlignment&lt;/code&gt;设为&lt;code&gt;top&lt;/code&gt;，&lt;code&gt;contentHorizontalAlignment&lt;/code&gt;设为&lt;code&gt;left&lt;/code&gt;，这样一来就符合了我们以左上角为坐标原点开始布局的惯性思维。当然这只是一种建议，也许有些人觉得从默认状态计算更加方便，我也赞同，毕竟imageEdgeInsets和titleEdgeInsets只是偏移量，和初始位置在哪并没有什么关系。&lt;/p&gt;
+&lt;h2 id=&quot;imageEdgeInsets和titleEdgeInsets&quot;&gt;&lt;a href=&quot;#imageEdgeInsets和titleEdgeInsets&quot; class=&quot;headerlink&quot; title=&quot;imageEdgeInsets和titleEdgeInsets&quot;&gt;&lt;/a&gt;imageEdgeInsets和titleEdgeInsets&lt;/h2&gt;&lt;p&gt;上面说了，我喜欢把Alignment设为left-top，所以我一开始的位置是这样的：&lt;br&gt;&lt;img src=&quot;/uploads/pic-3.jpg&quot; alt=&quot;image&quot; title=&quot;pic-3&quot;&gt;&lt;br&gt;因为在初始状态下，imageEdgeInsets和titleEdgeInsets都是0，所以在计算偏移量时，image的top-left-bottom以及title的top-bottom-right均能以button的边界最为参考，那image的right和title的left到底是以上面为参考呢，其实，image的right还是是button的边界为参考的，而title的left却是以image的left为参考的，这也正解释了上一节的疑问，为什么UIControlContentHorizontalAlignmentFill是那种样子的，具体请看图：&lt;br&gt;&lt;img src=&quot;/uploads/pic-4.jpg&quot; alt=&quot;image&quot; title=&quot;pic-4&quot;&gt;&lt;br&gt;搞清楚了这个以后，我们在实际做一个背景小节中介绍的image在上，title在下的button：&lt;br&gt;&lt;figure class=&quot;highlight objc&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;CGFloat&lt;/span&gt; imageTop = (button.height-image.height-title.height)/&lt;span class=&quot;number&quot;&gt;2&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;CGFloat&lt;/span&gt; titleTop = imageTop+image.height;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;CGFloat&lt;/span&gt; imageLeft = (button.width-image.width)/&lt;span class=&quot;number&quot;&gt;2&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;// 这里减了image.width，因为title的left是以image的left为参考&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;CGFloat&lt;/span&gt; titleLeft = (button.width-title.widht)/&lt;span class=&quot;number&quot;&gt;2&lt;/span&gt;-image.width;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;button.imageEdgeInsets = &lt;span class=&quot;built_in&quot;&gt;UIEdgeInsetsMake&lt;/span&gt;(imageTop, imageLeft, &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;, &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;button.titleEdgeInsets = &lt;span class=&quot;built_in&quot;&gt;UIEdgeInsetsMake&lt;/span&gt;(titleTop, titleLeft, &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;, &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;还有个问题，不知道大家看出来了没有？虽说left-top就能确定位置，但是不是就说right-bottom就没什么用了呢？像我这里全设为了0。答案是否定的，而且这也牵扯出了另一个问题—约束的优先级。先上个结论：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;top-left-bottom-right取负值 &amp;gt; 不能超出button边界 &amp;gt; imageView不能被压缩&lt;/li&gt;
+&lt;li&gt;top-left-bottom-right取负值 &amp;gt; 不能超出button边界 &amp;gt; titleLabel水平方向不能被压缩&lt;/li&gt;
+&lt;li&gt;titleLabel垂直方向不能被压缩 &amp;gt; 不能超出button边界&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这里的将image和title分开来的原因是这样的：imageView的宽高都能被压缩，titleLabel的宽只能压缩不能拉伸，titleLabel的高只能拉伸不能压缩。从上面三条规则中也能看出，想要超出button边界，只要top-left-bottom-right取负值就行了，当然title在垂直方向上由于不能被压缩，即使是正值也能超出。&lt;/p&gt;
+&lt;p&gt;接下来拿出实验数据来证明下结论：&lt;br&gt;&lt;img src=&quot;/uploads/pic-5.jpg&quot; alt=&quot;image&quot; title=&quot;pic-5&quot;&gt;&lt;/p&gt;
+&lt;p&gt;到这里，基本上已经能用好imageEdgeInsets和titleEdgeInsets了，那么还有一个问题，不知道大家注意到没有，title和image是能够超出button边界的，这个其实Apple doc是已经说明说了：&lt;/p&gt;
+&lt;p&gt;imageEdgeInsets和titleEdgeInsets:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This property is used only for positioning the image during layout. The button does not use this property to determine intrinsicContentSize and sizeThatFits:.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;contentEdgeInsets:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The button uses this property to determine intrinsicContentSize and sizeThatFits:.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;所以，如果大家想让image和title在设置insets时不超出边界，只需要同时调整下contentEdgeInsets即可。&lt;/p&gt;
+&lt;h2 id=&quot;总结&quot;&gt;&lt;a href=&quot;#总结&quot; class=&quot;headerlink&quot; title=&quot;总结&quot;&gt;&lt;/a&gt;总结&lt;/h2&gt;&lt;p&gt;之前也被imageEdgeInsets和titleEdgeInsets困扰过，就用了UIImageView和UILabel的组合来代替，为了不影响开发进度，也只能这样做，毕竟靠这个吃饭，不过在技术层面，这你能忍？结束。如有问题，请勘误。&lt;/p&gt;
+&lt;h2 id=&quot;其他&quot;&gt;&lt;a href=&quot;#其他&quot; class=&quot;headerlink&quot; title=&quot;其他&quot;&gt;&lt;/a&gt;其他&lt;/h2&gt;&lt;p&gt;&lt;a href=&quot;http://stackoverflow.com/questions/4564621/aligning-text-and-image-on-uibutton-with-imageedgeinsets-and-titleedgeinsets/5358259#5358259&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;参考链接&lt;/a&gt;&lt;br&gt;请我喝杯咖啡&lt;br&gt;&lt;img src=&quot;/uploads/alipay.jpg&quot; alt=&quot;image&quot;&gt;&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;背景&quot;&gt;&lt;a href=&quot;#背景&quot; class=&quot;headerlink&quot; title=&quot;背景&quot;&gt;&lt;/a&gt;背景&lt;/h2&gt;&lt;p&gt;UIButton在日常开发中经常用到，也经常需要做一些定制，这些定制很简单，就是改变image和title的位置而已，默认的image和ti
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://intMax.github.io/categories/iOS/"/>
+    
+    
+      <category term="实用技巧" scheme="http://intMax.github.io/tags/%E5%AE%9E%E7%94%A8%E6%8A%80%E5%B7%A7/"/>
+    
+  </entry>
   
   <entry>
     <title>根据View的优先级有序展示在Window上</title>
