@@ -1,0 +1,876 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="0T85hMCHTBPMm7VxqqQavADiP_f9EVNTs1diws9Yr0k" />
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="实用技巧," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="intMax'Blog" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="App版本迭代速度非常快，每次发版本前都需要回归一些核心测试用例，人工回归枯燥且重复劳动。自动化UI Test虽然不能完全代替人工，但能帮助分担大部分测例。能让机器干的就不要让人来干了，从自动化、UI Test两个方面来讲下怎么实现自动化UI Test。
+UI Test有什么用
+UI testing gives you the ability to find and interact with t">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自动化UI Test">
+<meta property="og:url" content="http://intMax.github.io/2016/12/04/auto-uitest/index.html">
+<meta property="og:site_name" content="intMax'Blog">
+<meta property="og:description" content="App版本迭代速度非常快，每次发版本前都需要回归一些核心测试用例，人工回归枯燥且重复劳动。自动化UI Test虽然不能完全代替人工，但能帮助分担大部分测例。能让机器干的就不要让人来干了，从自动化、UI Test两个方面来讲下怎么实现自动化UI Test。
+UI Test有什么用
+UI testing gives you the ability to find and interact with t">
+<meta property="og:image" content="http://intMax.github.io/uploads/ui-test-app-ui.png">
+<meta property="og:image" content="http://intMax.github.io/uploads/ui-test-app-ui.png">
+<meta property="og:image" content="http://intMax.github.io/uploads/ui-test-build.jpg">
+<meta property="og:image" content="http://intMax.github.io/uploads/ui-test-build-info.jpg">
+<meta property="og:image" content="http://intMax.github.io/uploads/ui-test-log.jpg">
+<meta property="og:updated_time" content="2016-12-04T07:50:42.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="自动化UI Test">
+<meta name="twitter:description" content="App版本迭代速度非常快，每次发版本前都需要回归一些核心测试用例，人工回归枯燥且重复劳动。自动化UI Test虽然不能完全代替人工，但能帮助分担大部分测例。能让机器干的就不要让人来干了，从自动化、UI Test两个方面来讲下怎么实现自动化UI Test。
+UI Test有什么用
+UI testing gives you the ability to find and interact with t">
+<meta name="twitter:image" content="http://intMax.github.io/uploads/ui-test-app-ui.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 自动化UI Test | intMax'Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-75599060-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+
+
+  <div style="display: none;">
+    <script src="http://s6.cnzz.com/stat.php?id=1256007767&web_id=1256007767" type="text/javascript"></script>
+  </div>
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">intMax'Blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">an iOS developer's Blog</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-rss">
+          <a href="/atom.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-rss fa-fw"></i> <br />
+            
+            RSS
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-friendship">
+          <a href="https://seewhy.me" rel="section">
+            
+              <i class="menu-item-icon fa fa-heartbeat fa-fw"></i> <br />
+            
+            seewhy'Blog
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                自动化UI Test
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-12-04T00:00:00+08:00" content="2016-12-04">
+              2016-12-04
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/12/04/auto-uitest/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/12/04/auto-uitest/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>App版本迭代速度非常快，每次发版本前都需要回归一些核心测试用例，人工回归枯燥且重复劳动。自动化UI Test虽然不能完全代替人工，但能帮助分担大部分测例。能让机器干的就不要让人来干了，从自动化、UI Test两个方面来讲下怎么实现自动化UI Test。</p>
+<h2 id="UI-Test"><a href="#UI-Test" class="headerlink" title="UI Test"></a>UI Test</h2><h3 id="有什么用"><a href="#有什么用" class="headerlink" title="有什么用"></a>有什么用</h3><blockquote>
+<p>UI testing gives you the ability to find and interact with the UI of your app in order to validate the properties and state of the UI elements.</p>
+</blockquote>
+<p>官方文档说的很简洁明了，UI Test能帮助我们去验证一些UI元素的属性和状态。</p>
+<h3 id="怎么做"><a href="#怎么做" class="headerlink" title="怎么做"></a>怎么做</h3><blockquote>
+<p>UI tests rests upon two core technologies: the XCTest framework and Accessibility.</p>
+<ul>
+<li>XCTest provides the framework for UI testing capabilities, integrated with Xcode. Creating and using UI testing expands upon what you know about using XCTest and creating unit tests. You create a UI test target, and you create UI test classes and UI test methods as a part of your project. You use XCTest assertions to validate that expected outcomes are true. You also get continuous integration via Xcode Server and xcodebuild. XCTest is fully compatible with both Objective-C and Swift.</li>
+<li>Accessibility is the core technology that allows disabled users the same rich experience for iOS and OS X that other users receive. It includes a rich set of semantic data about the UI that users can use can use to guide them through using your app. Accessibility is integrated with both UIKit and AppKit and has APIs that allow you to fine-tune behaviors and what is exposed for external use. UI testing uses that data to perform its functions.</li>
+</ul>
+</blockquote>
+<p>UI Test主要借助XCTest和Accessibility两个东西，其中XCTest框架帮我做了大部分事情，我们只要往<code>testExample</code>这个方法里填空就能将整个流程跑起来，每个以<code>test</code>开头的方法都会被当成一个测例。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">EBTest</span>: <span class="title">XCTestCase</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">func</span> <span class="title">setUp</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.setUp()</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// Put setup code here. This method is called before the invocation of each test method in the class.</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// In UI tests it is usually best to stop immediately when a failure occurs.</span></span><br><span class="line">        continueAfterFailure = <span class="literal">false</span></span><br><span class="line">        <span class="comment">// UI tests must launch the application that they test. Doing this in setup will make sure it happens for each test method.</span></span><br><span class="line">        <span class="type">XCUIApplication</span>().launch()</span><br><span class="line"></span><br><span class="line">        <span class="comment">// In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">func</span> <span class="title">tearDown</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// Put teardown code here. This method is called after the invocation of each test method in the class.</span></span><br><span class="line">        <span class="keyword">super</span>.tearDown()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">testExample</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// Use recording to get started writing UI tests.</span></span><br><span class="line">        <span class="comment">// Use XCTAssert and related functions to verify your tests produce the correct results.</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Accessibility这个东西的作用放到下面讲。</p>
+<h3 id="难点"><a href="#难点" class="headerlink" title="难点"></a>难点</h3><h4 id="获取指定元素"><a href="#获取指定元素" class="headerlink" title="获取指定元素"></a>获取指定元素</h4><p><img src="/uploads/ui-test-app-ui.png" alt="image"></p>
+<p>获取按钮</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 通过按钮title获取</span></span><br><span class="line">app.buttons[<span class="string">"立即购买"</span>]</span><br><span class="line"><span class="comment">// 通过图片资源名称获取</span></span><br><span class="line"><span class="comment">// btn navigationbar back可以通过Accessibility Inspector这个工具查看</span></span><br><span class="line">app.buttons[<span class="string">"btn navigationbar back"</span>]</span><br></pre></td></tr></table></figure>
+<p>获取文本</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 直接获取</span></span><br><span class="line">app.staticTexts[<span class="string">"豪华午餐"</span>]</span><br><span class="line"><span class="comment">// 通过NSPredicate匹配获取</span></span><br><span class="line"><span class="keyword">let</span> predicate = <span class="type">NSPredicate</span>(format:<span class="string">"label BEGINSWITH %@"</span>, <span class="string">"距离双12"</span>)</span><br><span class="line">app.staticTexts.element(matching:predicate)</span><br></pre></td></tr></table></figure>
+<p>上面两种方式只能获取到文本和按钮，但是无法获取UIImageView、UITableViewCell这类控件，那怎么获取到这类元素呢？一种方式是通过下标，但这种方式非常不稳定，很容易出现问题。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line">app.tables.element(boundBy: <span class="number">0</span>).cells.element(boundBy: <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<p>另一种方式就是通过Accessibility，我们可以为一个元素设置<code>accessibilityIdentifier</code>属性，这样就能获取到这个元素了。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// 生成button时设置accessibilityIdentifier</span><br><span class="line">- (UIButton *)buildButtonWithTitle:(NSString *)title identifier:(NSString *)identifier handler:(void (^)())handler &#123;</span><br><span class="line">    UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];</span><br><span class="line">    [button setTitle:title forState:UIControlStateNormal];</span><br><span class="line">    button.frame = [self buildFrame];</span><br><span class="line">    button.accessibilityIdentifier = identifier;</span><br><span class="line">    [self.view addSubview:button];</span><br><span class="line">    [button bk_addEventHandler:^(id sender) &#123;</span><br><span class="line">        handler();</span><br><span class="line">    &#125; forControlEvents:UIControlEventTouchUpInside];</span><br><span class="line">    </span><br><span class="line">    return button;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 通过设置的accessibilityIdentifier来获取这个按钮</span><br><span class="line">app.buttons.matching(identifier: &quot;EnterGoodsDetailNormal&quot;).element.tap()</span><br></pre></td></tr></table></figure>
+<p>但是这样这种方式对业务的侵入太严重了，在没有一个合适方案的情况下，可以考虑下面这种在壳工程中通过hook来设置accessibilityIdentifier。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">- (void)hook &#123;</span><br><span class="line">    static NSArray *hookArray = nil;</span><br><span class="line">    static dispatch_once_t onceToken;</span><br><span class="line">    dispatch_once(&amp;onceToken, ^&#123;</span><br><span class="line">        hookArray = @[ @&quot;SomeClass&quot;, @&quot;AnotherClass&quot; ];</span><br><span class="line">        SEL originalSelector = @selector(accessibilityIdentifier);</span><br><span class="line">        SEL swizzledSelector = @selector(eb_accessibilityIdentifier);</span><br><span class="line">        [hookArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) &#123;</span><br><span class="line">            [EBHookUtil eb_swizzleInstanceMethod:NSClassFromString(obj) swClass:[EBAppDelegate class] oriSel:originalSelector swSel:swizzledSelector];</span><br><span class="line">        &#125;];</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (NSString *)eb_accessibilityIdentifier &#123;</span><br><span class="line">    return NSStringFromClass([self class]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><p>我们看到的App界面由文字和图片组成，而UI Test只识别文字，但是有一个特殊的地方，如果图片在按钮上，那么这个按钮所在区域也会被识别，默认identifier就是图片的名称。</p>
+<p>借助Accessibility，可以突破上面描述的限制，你可以为某一个控件的accessibilityIdentifier属性赋值，这样，UI Test就能通过这个值获取到相应的控件。Accessibility本身是为有障碍人士设计的，当你的手摸到那个控件时，iPhone会通过语音告诉你这是什么东西。</p>
+<p>可惜的是目前还没特别好的方法让Accessibility和业务本身解耦。</p>
+<h4 id="忽略后端因素"><a href="#忽略后端因素" class="headerlink" title="忽略后端因素"></a>忽略后端因素</h4><p>后端因素主要指网络和数据，接口返回时机不可控，依赖于网络和服务器，但Test Case需要等到接口返回，并且App布局完成后才能开始，因此，大部分测例开始前，可以加入类似下面这样的代码，来判断App是否渲染完成。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line">expectation(<span class="keyword">for</span>: <span class="type">NSPredicate</span>(format:<span class="string">"count &gt; 0"</span>), evaluatedWith: app.tables, handler: <span class="literal">nil</span>)        </span><br><span class="line">waitForExpectations(timeout: <span class="number">3</span>, handler: <span class="literal">nil</span>)</span><br></pre></td></tr></table></figure>
+<p>另一个便是数据了，接口返回的数据变化不可控，但Test Case却是固定的。解决这个问题我想到了下面两个方案：</p>
+<ul>
+<li>Mock数据</li>
+<li>Test Case开始前，通过调用后端接口，造出相同的数据</li>
+</ul>
+<p>Mock数据</p>
+<p><img src="/uploads/ui-test-app-ui.png" alt="image"></p>
+<p>上图中，点击每个按钮后，都会hook获取数据的方法，将url替换成对应的mock数据url，这些工作都在壳工程中完成，不会对业务代码产生侵入性。</p>
+<p>造出相同数据</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 在setUp中设置launchArguments</span></span><br><span class="line"><span class="keyword">let</span> app = <span class="type">XCUIApplication</span>()</span><br><span class="line">app.launchArguments = [<span class="string">"cart_testcase_start"</span>]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 在application:didFinishLaunchingWithOptions:中监测启动</span></span><br><span class="line"><span class="type">NSArray</span> *args = [<span class="type">NSProcessInfo</span> processInfo].arguments;</span><br><span class="line"><span class="keyword">for</span> (int i = <span class="number">1</span>; i &lt; args.<span class="built_in">count</span>; ++i) &#123;</span><br><span class="line">    <span class="comment">// 检测到购物车相关测例即将开始，开始创造前置条件</span></span><br><span class="line">    <span class="keyword">if</span> ([args[i] isEqualToString:@<span class="string">"cart_testcase_start"</span>]) &#123;</span><br><span class="line">        <span class="comment">// 加入购物车</span></span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h4><p>上述方案已经能满足大部分Test Case的需求了，但局限性依旧存在，比如UI Test本身无法识别图片，这就意味着无法绕过图形验证码，另外就是短信验证码这类（Android貌似可以做到）。其他测例，理论上只要App内能完成的，Test Case就能覆盖到，但这就涉及到成本问题了，在壳工程内写肯定比在主工程中简单。</p>
+<h4 id="一些优化"><a href="#一些优化" class="headerlink" title="一些优化"></a>一些优化</h4><ul>
+<li>类似内存泄露等通用检测，可以统一处理，不必每个测例都写一遍</li>
+<li>测例开始后，每隔一段时间，XCTest框架会去扫描一遍App，动画的存在有时候会扰乱你获取界面元素，因此最好关闭动画</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">customSetUp</span><span class="params">()</span></span> -&gt; <span class="type">XCUIApplication</span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.setUp()</span><br><span class="line">        continueAfterFailure = <span class="literal">true</span></span><br><span class="line">        <span class="keyword">let</span> app = <span class="type">XCUIApplication</span>()</span><br><span class="line">        <span class="comment">// 在AppDelegate启动方法中监测animationsEnable，然后设置下关闭动画</span></span><br><span class="line">        app.launchEnvironment = [<span class="string">"animationsEnable"</span>: <span class="string">"NO"</span>]</span><br><span class="line">        memoryLeak()</span><br><span class="line">        <span class="keyword">return</span> app</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这里在工程中用了MLeakFinder，所以只要监测弹窗即可</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">memoryLeak</span><span class="params">()</span></span> &#123;</span><br><span class="line">        addUIInterruptionMonitor(withDescription: <span class="string">"Memory Leak, Big Brother"</span>) &#123; (alert) -&gt; <span class="type">Bool</span> <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">if</span> alert.staticTexts[<span class="string">"Memory Leak"</span>].exists ||</span><br><span class="line">               alert.staticTexts[<span class="string">"Retain Cycle"</span>].exists ||</span><br><span class="line">               alert.staticTexts[<span class="string">"Object Deallocated"</span>].exists &#123;</span><br><span class="line">                </span><br><span class="line">                <span class="comment">// 拼接造成内存泄露的原因</span></span><br><span class="line">                <span class="keyword">var</span> msg = <span class="string">""</span></span><br><span class="line">                <span class="keyword">let</span> title = alert.staticTexts.element(boundBy: <span class="number">0</span>)</span><br><span class="line">                <span class="keyword">if</span> title.exists &#123;</span><br><span class="line">                    msg += <span class="string">"标题："</span> + title.label</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">let</span> reason = alert.staticTexts.element(boundBy: <span class="number">1</span>)</span><br><span class="line">                <span class="keyword">if</span> reason.exists &#123;</span><br><span class="line">                    msg += <span class="string">" 原因："</span> + reason.label</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="type">XCTFail</span>(<span class="string">"Memory Leak, Big Brother "</span> + msg)</span><br><span class="line">                </span><br><span class="line">                alert.buttons[<span class="string">"OK"</span>].tap()</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="自动化"><a href="#自动化" class="headerlink" title="自动化"></a>自动化</h2><p>在自动化方面，主要借助Gitlab CI，具体怎么配置Gitlab CI就不在这里展开了，参考<a href="https://docs.gitlab.com/ee/ci/README.html" target="_blank" rel="external">官方文档</a></p>
+<p>先来看看最后的流程：</p>
+<p>step1：触发自动化流程，<code>git commit -m &quot;班车自动化UI Test&quot; &amp; git push</code></p>
+<p>step2：触发流程后，会在gitlab相应项目中生成一个build，等待build结束</p>
+<p><img src="/uploads/ui-test-build.jpg" alt="image"></p>
+<p>step3：点击build查看详情，通过下图可以看到这次build失败，原因是Detail的5个测例没有通过</p>
+<p><img src="/uploads/ui-test-build-info.jpg" alt="image"></p>
+<p>step4：在gitlab中显示的日志量比较少，是因为gitlab对日志量做了限制，所以在gitlab中的日志都是经过筛选的关键信息，具体错误原因通过查看服务器日志，下图日志说明了因为内存泄露导致了对应测例失败</p>
+<p><img src="/uploads/ui-test-log.jpg" alt="image"></p>
+<p>step5：build失败，邮件通知，交由相应组件负责人处理</p>
+<p>再来看看.gitlab-ci.yml文件，这个文件是Gitlab CI的配置文件，CI要做什么都可以在这个文件里面描述</p>
+<figure class="highlight coffeescript"><table><tr><td class="code"><pre><span class="line">stages:</span><br><span class="line">  - test</span><br><span class="line"></span><br><span class="line">before_script:</span><br><span class="line">  - cd Example</span><br><span class="line">  - pod update</span><br><span class="line"></span><br><span class="line">ui_test:</span><br><span class="line">  stage: test</span><br><span class="line">  script:</span><br><span class="line">   <span class="comment"># 这里先build一下，防止log日志过多，防止gitlab ci build log exceeded limit of 4194304 bytes.</span></span><br><span class="line">   - xcodebuild -workspace IntegrationTesting.xcworkspace -scheme IntegrationTesting-Example -destination <span class="string">'platform=iOS Simulator,name=iPhone 7,OS=10.1'</span> build &gt;/dev/<span class="literal">null</span> <span class="number">2</span>&gt;&amp;<span class="number">1</span></span><br><span class="line">   - xcodebuild -workspace IntegrationTesting.xcworkspace -scheme IntegrationTesting-Example -destination <span class="string">'platform=iOS Simulator,name=iPhone 7,OS=10.1'</span> test | tee Log/`date +%Y%m%d_%H%M%S`.log | grep -A <span class="number">5</span> <span class="string">'error:'</span></span><br></pre></td></tr></table></figure>
+<h2 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h2><p>这套方案应该算是比较初级的，自动化平台也建议大家用Jenkins，Gitlab CI有点弱，另外，大家有什么好点子可以多多交流，像Accessibility怎么和业务解耦之类的。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/实用技巧/" rel="tag">#实用技巧</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/10/uibutton-edgeinsets/" rel="next" title="理解UIButton的imageEdgeInsets和titleEdgeInsets">
+                <i class="fa fa-chevron-left"></i> 理解UIButton的imageEdgeInsets和titleEdgeInsets
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+    
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/12/04/auto-uitest/"
+           data-title="自动化UI Test" data-url="http://intMax.github.io/2016/12/04/auto-uitest/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.png"
+               alt="intMax" style="border-radius: 50px" />
+          <p class="site-author-name" itemprop="name">intMax</p>
+          <p class="site-description motion-element" itemprop="description">Talk is cheap, show me the code</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">5</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://www.github.com/intMax" target="_blank">
+                  
+                    <i class="fa fa-github"></i> GitHub
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.weibo.com/2860240432" target="_blank">
+                  
+                    <i class="fa fa-weibo"></i> Weibo
+                  
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#UI-Test"><span class="nav-number">1.</span> <span class="nav-text">UI Test</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#有什么用"><span class="nav-number">1.1.</span> <span class="nav-text">有什么用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#怎么做"><span class="nav-number">1.2.</span> <span class="nav-text">怎么做</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#难点"><span class="nav-number">1.3.</span> <span class="nav-text">难点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#获取指定元素"><span class="nav-number">1.3.1.</span> <span class="nav-text">获取指定元素</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#小结"><span class="nav-number">1.3.2.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#忽略后端因素"><span class="nav-number">1.3.3.</span> <span class="nav-text">忽略后端因素</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#小结-1"><span class="nav-number">1.3.4.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#一些优化"><span class="nav-number">1.3.5.</span> <span class="nav-text">一些优化</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自动化"><span class="nav-number">2.</span> <span class="nav-text">自动化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结束"><span class="nav-number">3.</span> <span class="nav-text">结束</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">intMax</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  
+<script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = NexT.utils.escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    NexT.motion.middleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+
+      if (CONFIG.sidebar.display === 'post' || CONFIG.sidebar.display === 'always') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          NexT.utils.displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"intmaxpan"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

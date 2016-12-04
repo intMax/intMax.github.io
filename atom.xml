@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://intMax.github.io/"/>
-  <updated>2016-10-05T06:03:54.000Z</updated>
+  <updated>2016-12-04T07:50:42.000Z</updated>
   <id>http://intMax.github.io/</id>
   
   <author>
@@ -14,6 +14,89 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>自动化UI Test</title>
+    <link href="http://intMax.github.io/2016/12/04/auto-uitest/"/>
+    <id>http://intMax.github.io/2016/12/04/auto-uitest/</id>
+    <published>2016-12-03T16:00:00.000Z</published>
+    <updated>2016-12-04T07:50:42.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>App版本迭代速度非常快，每次发版本前都需要回归一些核心测试用例，人工回归枯燥且重复劳动。自动化UI Test虽然不能完全代替人工，但能帮助分担大部分测例。能让机器干的就不要让人来干了，从自动化、UI Test两个方面来讲下怎么实现自动化UI Test。</p>
+<h2 id="UI-Test"><a href="#UI-Test" class="headerlink" title="UI Test"></a>UI Test</h2><h3 id="有什么用"><a href="#有什么用" class="headerlink" title="有什么用"></a>有什么用</h3><blockquote>
+<p>UI testing gives you the ability to find and interact with the UI of your app in order to validate the properties and state of the UI elements.</p>
+</blockquote>
+<p>官方文档说的很简洁明了，UI Test能帮助我们去验证一些UI元素的属性和状态。</p>
+<h3 id="怎么做"><a href="#怎么做" class="headerlink" title="怎么做"></a>怎么做</h3><blockquote>
+<p>UI tests rests upon two core technologies: the XCTest framework and Accessibility.</p>
+<ul>
+<li>XCTest provides the framework for UI testing capabilities, integrated with Xcode. Creating and using UI testing expands upon what you know about using XCTest and creating unit tests. You create a UI test target, and you create UI test classes and UI test methods as a part of your project. You use XCTest assertions to validate that expected outcomes are true. You also get continuous integration via Xcode Server and xcodebuild. XCTest is fully compatible with both Objective-C and Swift.</li>
+<li>Accessibility is the core technology that allows disabled users the same rich experience for iOS and OS X that other users receive. It includes a rich set of semantic data about the UI that users can use can use to guide them through using your app. Accessibility is integrated with both UIKit and AppKit and has APIs that allow you to fine-tune behaviors and what is exposed for external use. UI testing uses that data to perform its functions.</li>
+</ul>
+</blockquote>
+<p>UI Test主要借助XCTest和Accessibility两个东西，其中XCTest框架帮我做了大部分事情，我们只要往<code>testExample</code>这个方法里填空就能将整个流程跑起来，每个以<code>test</code>开头的方法都会被当成一个测例。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">EBTest</span>: <span class="title">XCTestCase</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">func</span> <span class="title">setUp</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.setUp()</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// Put setup code here. This method is called before the invocation of each test method in the class.</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// In UI tests it is usually best to stop immediately when a failure occurs.</span></span><br><span class="line">        continueAfterFailure = <span class="literal">false</span></span><br><span class="line">        <span class="comment">// UI tests must launch the application that they test. Doing this in setup will make sure it happens for each test method.</span></span><br><span class="line">        <span class="type">XCUIApplication</span>().launch()</span><br><span class="line"></span><br><span class="line">        <span class="comment">// In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">func</span> <span class="title">tearDown</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// Put teardown code here. This method is called after the invocation of each test method in the class.</span></span><br><span class="line">        <span class="keyword">super</span>.tearDown()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">testExample</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// Use recording to get started writing UI tests.</span></span><br><span class="line">        <span class="comment">// Use XCTAssert and related functions to verify your tests produce the correct results.</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Accessibility这个东西的作用放到下面讲。</p>
+<h3 id="难点"><a href="#难点" class="headerlink" title="难点"></a>难点</h3><h4 id="获取指定元素"><a href="#获取指定元素" class="headerlink" title="获取指定元素"></a>获取指定元素</h4><p><img src="/uploads/ui-test-app-ui.png" alt="image"></p>
+<p>获取按钮</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 通过按钮title获取</span></span><br><span class="line">app.buttons[<span class="string">"立即购买"</span>]</span><br><span class="line"><span class="comment">// 通过图片资源名称获取</span></span><br><span class="line"><span class="comment">// btn navigationbar back可以通过Accessibility Inspector这个工具查看</span></span><br><span class="line">app.buttons[<span class="string">"btn navigationbar back"</span>]</span><br></pre></td></tr></table></figure>
+<p>获取文本</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 直接获取</span></span><br><span class="line">app.staticTexts[<span class="string">"豪华午餐"</span>]</span><br><span class="line"><span class="comment">// 通过NSPredicate匹配获取</span></span><br><span class="line"><span class="keyword">let</span> predicate = <span class="type">NSPredicate</span>(format:<span class="string">"label BEGINSWITH %@"</span>, <span class="string">"距离双12"</span>)</span><br><span class="line">app.staticTexts.element(matching:predicate)</span><br></pre></td></tr></table></figure>
+<p>上面两种方式只能获取到文本和按钮，但是无法获取UIImageView、UITableViewCell这类控件，那怎么获取到这类元素呢？一种方式是通过下标，但这种方式非常不稳定，很容易出现问题。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line">app.tables.element(boundBy: <span class="number">0</span>).cells.element(boundBy: <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<p>另一种方式就是通过Accessibility，我们可以为一个元素设置<code>accessibilityIdentifier</code>属性，这样就能获取到这个元素了。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// 生成button时设置accessibilityIdentifier</span><br><span class="line">- (UIButton *)buildButtonWithTitle:(NSString *)title identifier:(NSString *)identifier handler:(void (^)())handler &#123;</span><br><span class="line">    UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];</span><br><span class="line">    [button setTitle:title forState:UIControlStateNormal];</span><br><span class="line">    button.frame = [self buildFrame];</span><br><span class="line">    button.accessibilityIdentifier = identifier;</span><br><span class="line">    [self.view addSubview:button];</span><br><span class="line">    [button bk_addEventHandler:^(id sender) &#123;</span><br><span class="line">        handler();</span><br><span class="line">    &#125; forControlEvents:UIControlEventTouchUpInside];</span><br><span class="line">    </span><br><span class="line">    return button;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 通过设置的accessibilityIdentifier来获取这个按钮</span><br><span class="line">app.buttons.matching(identifier: &quot;EnterGoodsDetailNormal&quot;).element.tap()</span><br></pre></td></tr></table></figure>
+<p>但是这样这种方式对业务的侵入太严重了，在没有一个合适方案的情况下，可以考虑下面这种在壳工程中通过hook来设置accessibilityIdentifier。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">- (void)hook &#123;</span><br><span class="line">    static NSArray *hookArray = nil;</span><br><span class="line">    static dispatch_once_t onceToken;</span><br><span class="line">    dispatch_once(&amp;onceToken, ^&#123;</span><br><span class="line">        hookArray = @[ @&quot;SomeClass&quot;, @&quot;AnotherClass&quot; ];</span><br><span class="line">        SEL originalSelector = @selector(accessibilityIdentifier);</span><br><span class="line">        SEL swizzledSelector = @selector(eb_accessibilityIdentifier);</span><br><span class="line">        [hookArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) &#123;</span><br><span class="line">            [EBHookUtil eb_swizzleInstanceMethod:NSClassFromString(obj) swClass:[EBAppDelegate class] oriSel:originalSelector swSel:swizzledSelector];</span><br><span class="line">        &#125;];</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (NSString *)eb_accessibilityIdentifier &#123;</span><br><span class="line">    return NSStringFromClass([self class]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><p>我们看到的App界面由文字和图片组成，而UI Test只识别文字，但是有一个特殊的地方，如果图片在按钮上，那么这个按钮所在区域也会被识别，默认identifier就是图片的名称。</p>
+<p>借助Accessibility，可以突破上面描述的限制，你可以为某一个控件的accessibilityIdentifier属性赋值，这样，UI Test就能通过这个值获取到相应的控件。Accessibility本身是为有障碍人士设计的，当你的手摸到那个控件时，iPhone会通过语音告诉你这是什么东西。</p>
+<p>可惜的是目前还没特别好的方法让Accessibility和业务本身解耦。</p>
+<h4 id="忽略后端因素"><a href="#忽略后端因素" class="headerlink" title="忽略后端因素"></a>忽略后端因素</h4><p>后端因素主要指网络和数据，接口返回时机不可控，依赖于网络和服务器，但Test Case需要等到接口返回，并且App布局完成后才能开始，因此，大部分测例开始前，可以加入类似下面这样的代码，来判断App是否渲染完成。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line">expectation(<span class="keyword">for</span>: <span class="type">NSPredicate</span>(format:<span class="string">"count &gt; 0"</span>), evaluatedWith: app.tables, handler: <span class="literal">nil</span>)        </span><br><span class="line">waitForExpectations(timeout: <span class="number">3</span>, handler: <span class="literal">nil</span>)</span><br></pre></td></tr></table></figure>
+<p>另一个便是数据了，接口返回的数据变化不可控，但Test Case却是固定的。解决这个问题我想到了下面两个方案：</p>
+<ul>
+<li>Mock数据</li>
+<li>Test Case开始前，通过调用后端接口，造出相同的数据</li>
+</ul>
+<p>Mock数据</p>
+<p><img src="/uploads/ui-test-app-ui.png" alt="image"></p>
+<p>上图中，点击每个按钮后，都会hook获取数据的方法，将url替换成对应的mock数据url，这些工作都在壳工程中完成，不会对业务代码产生侵入性。</p>
+<p>造出相同数据</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 在setUp中设置launchArguments</span></span><br><span class="line"><span class="keyword">let</span> app = <span class="type">XCUIApplication</span>()</span><br><span class="line">app.launchArguments = [<span class="string">"cart_testcase_start"</span>]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 在application:didFinishLaunchingWithOptions:中监测启动</span></span><br><span class="line"><span class="type">NSArray</span> *args = [<span class="type">NSProcessInfo</span> processInfo].arguments;</span><br><span class="line"><span class="keyword">for</span> (int i = <span class="number">1</span>; i &lt; args.<span class="built_in">count</span>; ++i) &#123;</span><br><span class="line">    <span class="comment">// 检测到购物车相关测例即将开始，开始创造前置条件</span></span><br><span class="line">    <span class="keyword">if</span> ([args[i] isEqualToString:@<span class="string">"cart_testcase_start"</span>]) &#123;</span><br><span class="line">        <span class="comment">// 加入购物车</span></span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h4><p>上述方案已经能满足大部分Test Case的需求了，但局限性依旧存在，比如UI Test本身无法识别图片，这就意味着无法绕过图形验证码，另外就是短信验证码这类（Android貌似可以做到）。其他测例，理论上只要App内能完成的，Test Case就能覆盖到，但这就涉及到成本问题了，在壳工程内写肯定比在主工程中简单。</p>
+<h4 id="一些优化"><a href="#一些优化" class="headerlink" title="一些优化"></a>一些优化</h4><ul>
+<li>类似内存泄露等通用检测，可以统一处理，不必每个测例都写一遍</li>
+<li>测例开始后，每隔一段时间，XCTest框架会去扫描一遍App，动画的存在有时候会扰乱你获取界面元素，因此最好关闭动画</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">customSetUp</span><span class="params">()</span></span> -&gt; <span class="type">XCUIApplication</span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.setUp()</span><br><span class="line">        continueAfterFailure = <span class="literal">true</span></span><br><span class="line">        <span class="keyword">let</span> app = <span class="type">XCUIApplication</span>()</span><br><span class="line">        <span class="comment">// 在AppDelegate启动方法中监测animationsEnable，然后设置下关闭动画</span></span><br><span class="line">        app.launchEnvironment = [<span class="string">"animationsEnable"</span>: <span class="string">"NO"</span>]</span><br><span class="line">        memoryLeak()</span><br><span class="line">        <span class="keyword">return</span> app</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这里在工程中用了MLeakFinder，所以只要监测弹窗即可</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">memoryLeak</span><span class="params">()</span></span> &#123;</span><br><span class="line">        addUIInterruptionMonitor(withDescription: <span class="string">"Memory Leak, Big Brother"</span>) &#123; (alert) -&gt; <span class="type">Bool</span> <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">if</span> alert.staticTexts[<span class="string">"Memory Leak"</span>].exists ||</span><br><span class="line">               alert.staticTexts[<span class="string">"Retain Cycle"</span>].exists ||</span><br><span class="line">               alert.staticTexts[<span class="string">"Object Deallocated"</span>].exists &#123;</span><br><span class="line">                </span><br><span class="line">                <span class="comment">// 拼接造成内存泄露的原因</span></span><br><span class="line">                <span class="keyword">var</span> msg = <span class="string">""</span></span><br><span class="line">                <span class="keyword">let</span> title = alert.staticTexts.element(boundBy: <span class="number">0</span>)</span><br><span class="line">                <span class="keyword">if</span> title.exists &#123;</span><br><span class="line">                    msg += <span class="string">"标题："</span> + title.label</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">let</span> reason = alert.staticTexts.element(boundBy: <span class="number">1</span>)</span><br><span class="line">                <span class="keyword">if</span> reason.exists &#123;</span><br><span class="line">                    msg += <span class="string">" 原因："</span> + reason.label</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="type">XCTFail</span>(<span class="string">"Memory Leak, Big Brother "</span> + msg)</span><br><span class="line">                </span><br><span class="line">                alert.buttons[<span class="string">"OK"</span>].tap()</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="自动化"><a href="#自动化" class="headerlink" title="自动化"></a>自动化</h2><p>在自动化方面，主要借助Gitlab CI，具体怎么配置Gitlab CI就不在这里展开了，参考<a href="https://docs.gitlab.com/ee/ci/README.html" target="_blank" rel="external">官方文档</a></p>
+<p>先来看看最后的流程：</p>
+<p>step1：触发自动化流程，<code>git commit -m &quot;班车自动化UI Test&quot; &amp; git push</code></p>
+<p>step2：触发流程后，会在gitlab相应项目中生成一个build，等待build结束</p>
+<p><img src="/uploads/ui-test-build.jpg" alt="image"></p>
+<p>step3：点击build查看详情，通过下图可以看到这次build失败，原因是Detail的5个测例没有通过</p>
+<p><img src="/uploads/ui-test-build-info.jpg" alt="image"></p>
+<p>step4：在gitlab中显示的日志量比较少，是因为gitlab对日志量做了限制，所以在gitlab中的日志都是经过筛选的关键信息，具体错误原因通过查看服务器日志，下图日志说明了因为内存泄露导致了对应测例失败</p>
+<p><img src="/uploads/ui-test-log.jpg" alt="image"></p>
+<p>step5：build失败，邮件通知，交由相应组件负责人处理</p>
+<p>再来看看.gitlab-ci.yml文件，这个文件是Gitlab CI的配置文件，CI要做什么都可以在这个文件里面描述</p>
+<figure class="highlight coffeescript"><table><tr><td class="code"><pre><span class="line">stages:</span><br><span class="line">  - test</span><br><span class="line"></span><br><span class="line">before_script:</span><br><span class="line">  - cd Example</span><br><span class="line">  - pod update</span><br><span class="line"></span><br><span class="line">ui_test:</span><br><span class="line">  stage: test</span><br><span class="line">  script:</span><br><span class="line">   <span class="comment"># 这里先build一下，防止log日志过多，防止gitlab ci build log exceeded limit of 4194304 bytes.</span></span><br><span class="line">   - xcodebuild -workspace IntegrationTesting.xcworkspace -scheme IntegrationTesting-Example -destination <span class="string">'platform=iOS Simulator,name=iPhone 7,OS=10.1'</span> build &gt;/dev/<span class="literal">null</span> <span class="number">2</span>&gt;&amp;<span class="number">1</span></span><br><span class="line">   - xcodebuild -workspace IntegrationTesting.xcworkspace -scheme IntegrationTesting-Example -destination <span class="string">'platform=iOS Simulator,name=iPhone 7,OS=10.1'</span> test | tee Log/`date +%Y%m%d_%H%M%S`.log | grep -A <span class="number">5</span> <span class="string">'error:'</span></span><br></pre></td></tr></table></figure>
+<h2 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h2><p>这套方案应该算是比较初级的，自动化平台也建议大家用Jenkins，Gitlab CI有点弱，另外，大家有什么好点子可以多多交流，像Accessibility怎么和业务解耦之类的。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;App版本迭代速度非常快，每次发版本前都需要回归一些核心测试用例，人工回归枯燥且重复劳动。自动化UI Test虽然不能完全代替人工，但能帮助分担大部分测例。能让机器干的就不要让人来干了，从自动化、UI Test两个方面来讲下怎么实现自动化UI Test。&lt;/p&gt;
+&lt;h2 i
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://intMax.github.io/categories/iOS/"/>
+    
+    
+      <category term="实用技巧" scheme="http://intMax.github.io/tags/%E5%AE%9E%E7%94%A8%E6%8A%80%E5%B7%A7/"/>
+    
+  </entry>
   
   <entry>
     <title>理解UIButton的imageEdgeInsets和titleEdgeInsets</title>
