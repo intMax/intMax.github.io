@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://intMax.github.io/"/>
-  <updated>2016-12-04T08:10:33.000Z</updated>
+  <updated>2018-01-07T12:05:19.658Z</updated>
   <id>http://intMax.github.io/</id>
   
   <author>
@@ -17,10 +17,10 @@
   
   <entry>
     <title>自动化UI Test</title>
-    <link href="http://intMax.github.io/2016/12/04/auto-uitest/"/>
-    <id>http://intMax.github.io/2016/12/04/auto-uitest/</id>
-    <published>2016-12-03T16:00:00.000Z</published>
-    <updated>2016-12-04T08:10:33.000Z</updated>
+    <link href="http://intMax.github.io/2016/12/10/auto-uitest/"/>
+    <id>http://intMax.github.io/2016/12/10/auto-uitest/</id>
+    <published>2016-12-09T16:00:00.000Z</published>
+    <updated>2018-01-07T12:05:19.658Z</updated>
     
     <content type="html"><![CDATA[<p>App版本迭代速度非常快，每次发版本前都需要回归一些核心测试用例，人工回归枯燥且重复劳动。自动化UI Test虽然不能完全代替人工，但能帮助分担大部分测例。能让机器干的就不要让人来干了，从自动化、UI Test两个方面来讲下怎么实现自动化UI Test。</p>
 <h2 id="UI-Test"><a href="#UI-Test" class="headerlink" title="UI Test"></a>UI Test</h2><h3 id="有什么用"><a href="#有什么用" class="headerlink" title="有什么用"></a>有什么用</h3><blockquote>
@@ -104,7 +104,7 @@
     <link href="http://intMax.github.io/2016/04/10/uibutton-edgeinsets/"/>
     <id>http://intMax.github.io/2016/04/10/uibutton-edgeinsets/</id>
     <published>2016-04-09T16:00:00.000Z</published>
-    <updated>2016-10-05T06:03:54.000Z</updated>
+    <updated>2018-01-07T11:34:53.709Z</updated>
     
     <content type="html"><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>UIButton在日常开发中经常用到，也经常需要做一些定制，这些定制很简单，就是改变image和title的位置而已，默认的image和title位置是这样的：<br><img src="/uploads/pic-0.jpg" alt="image"><br>但你拿到的设计稿却经常是这样的：<br><img src="/uploads/pic-1.jpg" alt="image"><br>有些朋友可能被“毫无规律”的imageEdgeInsets和titleEdgeInsets虐过，所以用UIImageView和UILabel的组合来代替了。本篇博客希望用最简单粗暴的方式–实验，来了解一下imageEdgeInsets和titleEdgeInsets到底是怎么玩的。这是我实验的<a href="https://github.com/intMax/DMTButton" target="_blank" rel="external">Demo</a>，帮你免去了改个数据就要cmd-R的烦恼。</p>
 <h2 id="contentVerticalAlignment和contentHorizontalAlignment"><a href="#contentVerticalAlignment和contentHorizontalAlignment" class="headerlink" title="contentVerticalAlignment和contentHorizontalAlignment"></a>contentVerticalAlignment和contentHorizontalAlignment</h2><p>这两个属性是UIControl的，是用来排列内部元素的，用好他们，可以让我们的计算轻松一点。先来看看他们的值：<br><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="built_in">NS_ENUM</span>(<span class="built_in">NSInteger</span>, <span class="built_in">UIControlContentVerticalAlignment</span>) &#123;</span><br><span class="line">    <span class="built_in">UIControlContentVerticalAlignmentCenter</span>  = <span class="number">0</span>,</span><br><span class="line">    <span class="built_in">UIControlContentVerticalAlignmentTop</span>     = <span class="number">1</span>,</span><br><span class="line">    <span class="built_in">UIControlContentVerticalAlignmentBottom</span>  = <span class="number">2</span>,</span><br><span class="line">    <span class="built_in">UIControlContentVerticalAlignmentFill</span>    = <span class="number">3</span>,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="built_in">NS_ENUM</span>(<span class="built_in">NSInteger</span>, <span class="built_in">UIControlContentHorizontalAlignment</span>) &#123;</span><br><span class="line">    <span class="built_in">UIControlContentHorizontalAlignmentCenter</span> = <span class="number">0</span>,</span><br><span class="line">    <span class="built_in">UIControlContentHorizontalAlignmentLeft</span>   = <span class="number">1</span>,</span><br><span class="line">    <span class="built_in">UIControlContentHorizontalAlignmentRight</span>  = <span class="number">2</span>,</span><br><span class="line">    <span class="built_in">UIControlContentHorizontalAlignmentFill</span>   = <span class="number">3</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
@@ -190,12 +190,12 @@
     <link href="http://intMax.github.io/2015/08/02/effective-objective-c-2/"/>
     <id>http://intMax.github.io/2015/08/02/effective-objective-c-2/</id>
     <published>2015-08-01T16:00:00.000Z</published>
-    <updated>2016-03-27T10:29:02.000Z</updated>
+    <updated>2018-01-07T12:04:03.286Z</updated>
     
     <content type="html"><![CDATA[<h2 id="第三章-接口与API设计"><a href="#第三章-接口与API设计" class="headerlink" title="第三章 接口与API设计"></a>第三章 接口与API设计</h2><p>1.Objective-C没有命名空间，所以在命名上最好加上前缀以减小冲突的可能，前缀建议采用三个字母（苹果保留使用所有两个字母前缀的权利）。在开发自己的类库时如果用了其他第三方类库，最好将第三方类库也加上前缀，这样可以让使用者使用你的类库的同时也用你的类库中用到第三方类库（有点绕. . .）。</p>
 <p>2.覆写<code>description</code>方法，打印出一些有用信息帮助调试。</p>
 <p>3.封装一个对象时，对外公开属性最好是只读(<code>readonly</code>)的，如果要在内部修改可在对象内部重新声明为readwrite。这种模式在AFNetworking有着大量的应用。</p>
-<p>4.私有方法最好加上前缀(p<em> )，前缀不要只用一个下划线(</em>)，这种做法是苹果预留的。</p>
+<p>4.私有方法最好加上前缀(p<em> )，前缀不要只用一个下划线( </em> )，这种做法是苹果预留的。</p>
 <p>5.容器类对象默认执行的是浅拷贝，若要执行深拷贝需要自己编写相关方法。</p>
 <h2 id="第四章-协议与分类"><a href="#第四章-协议与分类" class="headerlink" title="第四章 协议与分类"></a>第四章 协议与分类</h2><p>1.委托属性常用weak来修饰；一个协议里的方法是<code>optional</code>的，需要先判断委托对象是否实现改方法，如果经常需要判断则可考虑做个缓存。</p>
 <p>2.<code>weak</code>和<code>unsafe_unretain</code>的区别是前者在相关对象销毁时需要自动清空，后者则不需要。</p>

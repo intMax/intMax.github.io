@@ -71,7 +71,7 @@
 <meta property="og:description" content="第三章 接口与API设计1.Objective-C没有命名空间，所以在命名上最好加上前缀以减小冲突的可能，前缀建议采用三个字母（苹果保留使用所有两个字母前缀的权利）。在开发自己的类库时如果用了其他第三方类库，最好将第三方类库也加上前缀，这样可以让使用者使用你的类库的同时也用你的类库中用到第三方类库（有点绕. . .）。
 2.覆写description方法，打印出一些有用信息帮助调试。
 3.封装一个">
-<meta property="og:updated_time" content="2016-03-27T10:29:02.000Z">
+<meta property="og:updated_time" content="2018-01-07T12:04:03.286Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Effective Objective-C 2.0 阅读笔记<二>">
 <meta name="twitter:description" content="第三章 接口与API设计1.Objective-C没有命名空间，所以在命名上最好加上前缀以减小冲突的可能，前缀建议采用三个字母（苹果保留使用所有两个字母前缀的权利）。在开发自己的类库时如果用了其他第三方类库，最好将第三方类库也加上前缀，这样可以让使用者使用你的类库的同时也用你的类库中用到第三方类库（有点绕. . .）。
@@ -310,7 +310,7 @@
         <h2 id="第三章-接口与API设计"><a href="#第三章-接口与API设计" class="headerlink" title="第三章 接口与API设计"></a>第三章 接口与API设计</h2><p>1.Objective-C没有命名空间，所以在命名上最好加上前缀以减小冲突的可能，前缀建议采用三个字母（苹果保留使用所有两个字母前缀的权利）。在开发自己的类库时如果用了其他第三方类库，最好将第三方类库也加上前缀，这样可以让使用者使用你的类库的同时也用你的类库中用到第三方类库（有点绕. . .）。</p>
 <p>2.覆写<code>description</code>方法，打印出一些有用信息帮助调试。</p>
 <p>3.封装一个对象时，对外公开属性最好是只读(<code>readonly</code>)的，如果要在内部修改可在对象内部重新声明为readwrite。这种模式在AFNetworking有着大量的应用。</p>
-<p>4.私有方法最好加上前缀(p<em> )，前缀不要只用一个下划线(</em>)，这种做法是苹果预留的。</p>
+<p>4.私有方法最好加上前缀(p<em> )，前缀不要只用一个下划线( </em> )，这种做法是苹果预留的。</p>
 <p>5.容器类对象默认执行的是浅拷贝，若要执行深拷贝需要自己编写相关方法。</p>
 <h2 id="第四章-协议与分类"><a href="#第四章-协议与分类" class="headerlink" title="第四章 协议与分类"></a>第四章 协议与分类</h2><p>1.委托属性常用weak来修饰；一个协议里的方法是<code>optional</code>的，需要先判断委托对象是否实现改方法，如果经常需要判断则可考虑做个缓存。</p>
 <p>2.<code>weak</code>和<code>unsafe_unretain</code>的区别是前者在相关对象销毁时需要自动清空，后者则不需要。</p>
@@ -457,7 +457,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -530,7 +530,7 @@
         <div class="copyright" >
   
   &copy;  2015 - 
-  <span itemprop="copyrightYear">2017</span>
+  <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
