@@ -75,7 +75,7 @@
 Instruc">
 <meta property="og:type" content="article">
 <meta property="og:title" content="iOS hotfix，老思路新框架">
-<meta property="og:url" content="http://intMax.github.io/2015/08/30/instructional-patch/index.html">
+<meta property="og:url" content="http://intMax.github.io/2018/03/10/instructional-patch/index.html">
 <meta property="og:site_name" content="intMax'Blog">
 <meta property="og:description" content="InstructionalPatch是一个不依赖其他语言引擎的热修复框架，通过下发json文件，再利用runtime来完成热修复。不依赖其他语言引擎好处有：
 
@@ -89,7 +89,7 @@ Instruc">
 热修复代码可读性差，当然可以通过脚本自动生成json来优化
 
 Instruc">
-<meta property="og:updated_time" content="2018-03-10T08:54:31.747Z">
+<meta property="og:updated_time" content="2018-03-10T09:36:33.536Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS hotfix，老思路新框架">
 <meta name="twitter:description" content="InstructionalPatch是一个不依赖其他语言引擎的热修复框架，通过下发json文件，再利用runtime来完成热修复。不依赖其他语言引擎好处有：
@@ -288,8 +288,8 @@ Instruc">
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-08-30T00:00:00+08:00" content="2015-08-30">
-              2015-08-30
+            <time itemprop="dateCreated" datetime="2018-03-10T00:00:00+08:00" content="2018-03-10">
+              2018-03-10
             </time>
           </span>
 
@@ -348,7 +348,7 @@ Instruc">
 <p>InstructionalPatch基本原理是修改forwardInvocation:，使其指向自己的实现，当要修复某个方法时，让它转发到自己实现的forwardInvocation:中。方法的实现由一系列消息组成，消息之间的参数、变量通过一个环境池（Map）传递，这个环境池会在方法结束时自动清空。</p>
 <h3 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h3><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">IPViewController</span></span></span><br><span class="line">  </span><br><span class="line">- (<span class="keyword">void</span>)viewDidLoad &#123;</span><br><span class="line">    [<span class="keyword">super</span> viewDidLoad];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (<span class="built_in">NSString</span> *)returnClassMethod &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">NSStringFromSelector</span>(_cmd);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)logObject:(<span class="built_in">NSString</span> *)obj &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"%@"</span>, obj);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
 <p>现在需要在viewDidLoad中打印returnClassMethod中返回的字符串只需要以下指令：<br><figure class="highlight"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    // 所有修复指令</span><br><span class="line">    "instructions": [</span><br><span class="line">        &#123;</span><br><span class="line">            // 被修复的类</span><br><span class="line">            "cls": "IPViewController",</span><br><span class="line">            // 被修复方法</span><br><span class="line">            "methodList": [</span><br><span class="line">                &#123;</span><br><span class="line">                    // 修复的方法selector</span><br><span class="line">                    "method": "viewDidLoad",</span><br><span class="line">                    "isStatic": false,</span><br><span class="line">                    // 修复后的方法实现</span><br><span class="line">                    "messages": [</span><br><span class="line">                        &#123;</span><br><span class="line">                            // [super viewDidLoad]</span><br><span class="line">                            "receiver": "super",</span><br><span class="line">                            "message": "viewDidLoad"</span><br><span class="line">                        &#125;,</span><br><span class="line">                        &#123;</span><br><span class="line">                            // NSString *logStr = [IPViewController returnClassMethod];</span><br><span class="line">                            // logStr将会被存入环境池 </span><br><span class="line">                            "returnType": "NSString",</span><br><span class="line">                            "returnObj": "logStr",</span><br><span class="line">                            "receiver": "IPViewController",</span><br><span class="line">                            "isStatic":true,</span><br><span class="line">                            "message": "returnClassMethod"</span><br><span class="line">                        &#125;,</span><br><span class="line">                        &#123;</span><br><span class="line">                            // [self logObject:logStr];</span><br><span class="line">                            "receiver": "self",</span><br><span class="line">                            "message": "logObject:",</span><br><span class="line">                            "args": [</span><br><span class="line">                                &#123;</span><br><span class="line">                                    // 从环境池中取logStr这个对象</span><br><span class="line">                                    "valueKey": "logStr"</span><br><span class="line">                                &#125;</span><br><span class="line">                            ]</span><br><span class="line">                        &#125;</span><br><span class="line">                    ]</span><br><span class="line">                &#125;</span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>详情使用方式参见<a href="intmax.github.io">使用文档</a>。</p>
+<p>详情使用方式参见<a href="https://github.com/intMax/InstructionPatch/blob/master/Usage_CN.md" target="_blank" rel="external">使用文档</a>。</p>
 <h3 id="技术实现"><a href="#技术实现" class="headerlink" title="技术实现"></a>技术实现</h3><p>目前大多数hotfix框架都是通过runtime+其他语言引擎来实现的，当然也有像手Q这样直接介入编译阶段的，目前我知道的一些公司在用的有ruby、lua、javascript，基本原理就是利用runtime和这些语言引擎通信，这样就能用其他语言来写OC的代码了。仔细想想这里的引擎起到了什么作用？无非是一个代码运行的环境，简单来说就是栈+基本语法支持，这里的栈是用来记录方法运行产生的变量的，另外在OC中，大部分实现都是通过调用OC方法以及配合if-else、循环来实现的，所以InstructionalPatch的基本思想就是当修复一个方法时，为这个方法生产一个环境池，用来存放方法内部产生的变量；方法的实现是N条消息组成，相当于N个方法调用，这些调用产生的变量和参数通过环境池存取；再加上if-else、while的支持，实现了一个简易版的热修复框架。</p>
 <h4 id="environmentPool"><a href="#environmentPool" class="headerlink" title="environmentPool"></a>environmentPool</h4><p>环境池实际上就是一个全局的静态Map，用key-value的形式存取，当进入一个方法时，自动为这个方法开辟一块空间来存放产生的变量，退出方法时再清空这块空间。但实际上，方法实现中经常有异步的block，这时候方法结束了并不能立即清空，否则block真正在执行的时候就没地方去取相应的变量了。为了解决这个问题，借鉴了一下OC的引用计数，当方法开始时引用+1，发现有block时引用也+1，方法执行结束、block执行结束引用-1，这样就能避免环境池过早释放的问题了。但是这又引出了另外一个问题，像一个网络请求一般有success和failure两个block，但是最终却只有一个能被执行，这就导致引用计数始终大于0，而且在代码上并不能判断一个block会不会被执行，所以只能是让用户手动在json的message中手动指定引用的次数environmentPoolRefCount。</p>
 <p>既然environmentPool是个Map，那么就只能存取id类型的变量，所以对一些基本类型的变量要做一层包装，在使用的时候再解包。变量类型主要通过NSMethodSignature中的信息根据<a href="https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html" target="_blank" rel="external">Type Encodings</a>来判断。</p>
@@ -394,17 +394,13 @@ Instruc">
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/08/02/effective-objective-c-2/" rel="next" title="Effective Objective-C 2.0 阅读笔记<二>">
-                <i class="fa fa-chevron-left"></i> Effective Objective-C 2.0 阅读笔记<二>
+              <a href="/2016/12/10/auto-uitest/" rel="next" title="自动化UI Test">
+                <i class="fa fa-chevron-left"></i> 自动化UI Test
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2015/08/30/effective-objective-c-3/" rel="prev" title="Effective Objective-C 2.0 阅读笔记<三>">
-                Effective Objective-C 2.0 阅读笔记<三> <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
