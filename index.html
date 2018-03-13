@@ -246,7 +246,7 @@
               
                 
                 <a class="post-title-link" href="/2018/03/10/instructional-patch/" itemprop="url">
-                  iOS hotfix，老思路新框架
+                  iOS Hotfix，老思路新框架
                 </a>
               
             
@@ -307,15 +307,7 @@
       
         
           
-          InstructionalPatch是一个不依赖其他语言引擎的热修复框架，通过下发json文件，再利用runtime来完成热修复。不依赖其他语言引擎好处有：
-
-不需要引入多余的引擎
-支持的系统版本更多
-可控性强，无论是对象转换还是引用管理，当然做的也多
-
-坏处：
-
-基本语法不支持，诸如if-else
+          背景目前大多数hotfix框架都是通过runtime+其他语言引擎来实现的，当然也有像手Q这样自己编译、解析字节码的，目前我知道的一些公司在用的有ruby、lua、javascript，基本原理就是利用这些语言引擎与OC通信，再通过runtime完成方法调用，这样就能用其他语言来写OC的代码了。仔细
           ...
 
           <div class="post-more-link text-center">
